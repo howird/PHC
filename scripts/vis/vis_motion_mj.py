@@ -88,7 +88,7 @@ if __name__ == "__main__":
     }
     smpl_robot = SMPL_Robot(
         robot_cfg,
-        data_dir="data/smpl",
+        data_dir=osp.abspath("phc/data/smpl"),
     )
     
     gender_beta = np.zeros((17))

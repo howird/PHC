@@ -9,8 +9,8 @@ scikit-image
 numpy
 scipy
 ipdb
-joblib>=1.2.0
-opencv-python==4.6.0.66
+joblib
+opencv-python
 tqdm 
 pyyaml
 wandb
@@ -24,7 +24,7 @@ autograd
 scikit-learn
 chumpy
 patchelf
-rl-games==1.1.4
+rl-games
 wandb
 pyvirtualdisplay
 chumpy

@@ -130,10 +130,12 @@ class MotionLibBase():
         if osp.isfile(motion_file):
             self.mode = MotionlibMode.file
             self._motion_data_load = joblib.load(motion_file)
-        else:
+        elif osp.isdir(motion_file):
             self.mode = MotionlibMode.directory
             self._motion_data_load = glob.glob(osp.join(motion_file, "*.pkl"))
-        
+        else:
+            raise FileNotFoundError(f"Invalid motion file or directory, {motion_file}")
+
         data_list = self._motion_data_load
 
         if self.mode == MotionlibMode.file:

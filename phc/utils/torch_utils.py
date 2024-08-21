@@ -26,9 +26,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import numpy as np
-
-from isaacgym.torch_utils import *
+import omni.isaac.lab.utils.math as lab_math
 import torch
 from torch import nn
 import phc.utils.pytorch3d_transforms as ptr
@@ -64,7 +62,7 @@ def quat_to_angle_axis(q):
 
     sin_theta = torch.sqrt(1 - q[..., qw] * q[..., qw])
     angle = 2 * torch.acos(q[..., qw])
-    angle = normalize_angle(angle)
+    angle = lab_math.wrap_to_pi(angle)
     sin_theta_expand = sin_theta.unsqueeze(-1)
     axis = q[..., qx:qw] / sin_theta_expand
 
@@ -140,7 +138,7 @@ def tan_norm_to_quat(tan_norm):
 @torch.jit.script
 def euler_xyz_to_exp_map(roll, pitch, yaw):
     # type: (Tensor, Tensor, Tensor) -> Tensor
-    q = quat_from_euler_xyz(roll, pitch, yaw)
+    q = lab_math.quat_from_euler_xyz(roll, pitch, yaw)
     exp_map = quat_to_exp_map(q)
     return exp_map
 
@@ -152,7 +150,7 @@ def exp_map_to_angle_axis(exp_map):
     angle = torch.norm(exp_map, dim=-1)
     angle_exp = torch.unsqueeze(angle, dim=-1)
     axis = exp_map / angle_exp
-    angle = normalize_angle(angle)
+    angle = lab_math.wrap_to_pi(angle)
 
     default_axis = torch.zeros_like(exp_map)
     default_axis[..., -1] = 1
@@ -168,7 +166,7 @@ def exp_map_to_angle_axis(exp_map):
 @torch.jit.script
 def exp_map_to_quat(exp_map):
     angle, axis = exp_map_to_angle_axis(exp_map)
-    q = quat_from_angle_axis(angle, axis)
+    q = lab_math.quat_from_angle_axis(angle, axis)
     return q
 
 
@@ -222,7 +220,7 @@ def calc_heading_quat(q):
     axis = torch.zeros_like(q[..., 0:3])
     axis[..., 2] = 1
 
-    heading_q = quat_from_angle_axis(heading, axis)
+    heading_q = lab_math.quat_from_angle_axis(heading, axis)
     return heading_q
 
 
@@ -236,7 +234,7 @@ def calc_heading_quat_inv(q):
     axis = torch.zeros_like(q[..., 0:3])
     axis[..., 2] = 1
 
-    heading_q = quat_from_angle_axis(-heading, axis)
+    heading_q = lab_math.quat_from_angle_axis(-heading, axis)
     return heading_q
 
 def activation_facotry(act_name):
