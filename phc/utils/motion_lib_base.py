@@ -20,6 +20,7 @@ import gc
 from scipy.spatial.transform import Rotation as sRot
 import random
 from phc.utils.flags import flags
+import poselib.poselib.core.rotation3d as rot3d
 from enum import Enum
 USE_CACHE = False
 print("MOVING MOTION DATA TO GPU, USING CACHE:", USE_CACHE)
@@ -46,7 +47,7 @@ if not USE_CACHE:
 
 def local_rotation_to_dof_vel(local_rot0, local_rot1, dt):
     # Assume each joint is 3dof
-    diff_quat_data = torch_utils.quat_mul(torch_utils.quat_conjugate(local_rot0), local_rot1)
+    diff_quat_data = rot3d.quat_mul(rot3d.quat_conjugate(local_rot0), local_rot1)
     diff_angle, diff_axis = torch_utils.quat_to_angle_axis(diff_quat_data)
     dof_vel = diff_axis * diff_angle.unsqueeze(-1) / dt
 
