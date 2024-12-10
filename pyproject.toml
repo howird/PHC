@@ -1,5 +1,5 @@
 [project]
-name = ""
+name = "phc"
 version = "0.1.0"
 description = ""
 readme = "README.md"
@@ -7,12 +7,19 @@ requires-python = "==3.8.*"
 
 dependencies = [
   "chumpy",
-  "debugpy>=1.8.9",
   "gymnasium==0.29.1",
   "isaacgym",
-  "numpy>=1.24.4",
-  "pip>=24.3.1",
   "smpl-sim",
+  "smplx",
+  "debugpy>=1.8.9",
+  "aiohttp>=3.10.11",
+  "scikit-image>=0.21.0",
+  "termcolor>=2.4.0",
+  "open3d>=0.18.0",
+  "rl-games==1.1.4",
+  "imageio[ffmpeg,pyav]>=2.35.1",
+  "wandb>=0.19.0",
+  "mujoco>=3.2.3",
 ]
 
 [tool.uv]

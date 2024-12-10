@@ -35,8 +35,6 @@ os.environ["OMP_NUM_THREADS"] = "1"
 
 sys.path.append(os.getcwd())
 
-import debugpy
-
 def debugger(port=5678):
     import debugpy
     debugpy.listen(port)
