@@ -1,0 +1,25 @@
+[project]
+name = ""
+version = "0.1.0"
+description = ""
+readme = "README.md"
+requires-python = "==3.8.*"
+
+dependencies = [
+  "chumpy",
+  "debugpy>=1.8.9",
+  "gymnasium==0.29.1",
+  "isaacgym",
+  "numpy>=1.24.4",
+  "pip>=24.3.1",
+  "smpl-sim",
+]
+
+[tool.uv]
+environments = ["platform_system == 'Linux'"]
+
+[tool.uv.sources]
+smplx = { git = "https://github.com/ZhengyiLuo/smplx.git", rev = "a5b8e4ac14f79f3f33fd2cf2a16e6f507146b813" }
+isaacgym = { path = "isaacgym/python", editable = true }
+smpl-sim = { git = "https://github.com/ZhengyiLuo/SMPLSim.git", rev = "master" }
+chumpy = { git = "https://github.com/mattloper/chumpy" }

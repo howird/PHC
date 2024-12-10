@@ -47,7 +47,7 @@ if __name__ == "__main__":
         }
 
     smpl_local_robot = LocalRobot(robot_cfg,)
-    all_pkls = glob.glob("AMASS_data/**/*.npz", recursive=True)
+    all_pkls = glob.glob("/home/howird/robo/PHC/data/amass/**/*.npz", recursive=True)
     amass_occlusion = joblib.load("sample_data/amass_copycat_occlusion_v3.pkl")
     amass_full_motion_dict = {}
     amass_splits = {
@@ -59,10 +59,12 @@ if __name__ == "__main__":
     length_acc = []
     for data_path in tqdm(all_pkls):
         bound = 0
+        # CHANGE THE NUMBER TO THE DEPTH OF YOUR DATA DIR WRT ROOT DIR (`/`)
         splits = data_path.split("/")[7:]
         key_name_dump = "0-" + "_".join(splits).replace(".npz", "")
         
         if (not splits[0] in process_set):
+            print(f"Skipping {data_path}: Not in process set {process_split}.")
             continue
         
         if key_name_dump in amass_occlusion:
@@ -79,6 +81,7 @@ if __name__ == "__main__":
         entry_data = dict(np.load(open(data_path, "rb"), allow_pickle=True))
         
         if not 'mocap_framerate' in  entry_data:
+            print(f"Skipping {data_path}: No mocap_framerate.")
             continue
         framerate = entry_data['mocap_framerate']
 
@@ -99,6 +102,7 @@ if __name__ == "__main__":
         pose_aa = pose_aa[:bound]
         N = pose_aa.shape[0]
         if N < 10:
+            print(f"Skipping {data_path}: Too short.")
             continue
     
         smpl_2_mujoco = [SMPL_BONE_ORDER_NAMES.index(q) for q in SMPL_MUJOCO_NAMES if q in SMPL_BONE_ORDER_NAMES]
@@ -143,10 +147,13 @@ if __name__ == "__main__":
         amass_full_motion_dict[key_name_dump] = new_motion_out
         
     import ipdb; ipdb.set_trace()
+
+    output_dir = "data/amass"
+    os.makedirs(output_dir, exist_ok=True)
     if upright_start:
-        joblib.dump(amass_full_motion_dict, "data/amass/amass_train_take6_upright.pkl", compress=True)
+        joblib.dump(amass_full_motion_dict, os.path.join(output_dir, f"amass_{process_split}_take6_upright.pkl"), compress=True)
     else:
-        joblib.dump(amass_full_motion_dict, "data/amass/amass_train_take6.pkl", compress=True)
+        joblib.dump(amass_full_motion_dict, os.path.join(output_dir, f"amass_{process_split}_take6.pkl"), compress=True)
     # joblib.dump(amass_full_motion_dict, "data/amass/amass_test_take6.pkl", compress=True)
     # joblib.dump(amass_full_motion_dict, "data/amass_x/singles/total_capture.pkl", compress=True)
     # joblib.dump(amass_full_motion_dict, "data/amass_x/upright/singles/total_capture.pkl", compress=True)

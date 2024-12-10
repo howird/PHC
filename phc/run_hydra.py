@@ -35,6 +35,15 @@ os.environ["OMP_NUM_THREADS"] = "1"
 
 sys.path.append(os.getcwd())
 
+import debugpy
+
+def debugger(port=5678):
+    import debugpy
+    debugpy.listen(port)
+    print(f"Waiting for debugger attach to port: {port}")
+    debugpy.wait_for_client()
+debugger()
+
 from phc.utils.config import set_np_formatting, set_seed
 from phc.utils.parse_task import parse_task
 from isaacgym import gymapi
@@ -271,7 +280,7 @@ def main(cfg_hydra: DictConfig) -> None:
     global cfg
     
     cfg = EasyDict(OmegaConf.to_container(cfg_hydra, resolve=True))
-    
+
     set_np_formatting()
 
     # cfg, cfg_train, logdir = load_cfg(args)

@@ -13,8 +13,7 @@ import os.path as osp
 
 sys.path.append(os.getcwd())
 
-from smpl_sim.khrylib.utils import get_body_qposaddr
-from smpl_sim.smpllib.smpl_mujoco import SMPL_BONE_ORDER_NAMES as joint_names
+from smpl_sim.smpllib.smpl_joint_names import SMPL_BONE_ORDER_NAMES as joint_names
 from smpl_sim.smpllib.smpl_local_robot import SMPL_Robot as LocalRobot
 import scipy.ndimage.filters as filters
 from typing import List, Optional
@@ -42,8 +41,6 @@ amass_data = joblib.load("insert_your_data")
 double = False
 
 mujoco_joint_names = ['Pelvis', 'L_Hip', 'L_Knee', 'L_Ankle', 'L_Toe', 'R_Hip', 'R_Knee', 'R_Ankle', 'R_Toe', 'Torso', 'Spine', 'Chest', 'Neck', 'Head', 'L_Thorax', 'L_Shoulder', 'L_Elbow', 'L_Wrist', 'L_Hand', 'R_Thorax', 'R_Shoulder', 'R_Elbow', 'R_Wrist', 'R_Hand']
-
- 
 
 amass_remove_data = []
 

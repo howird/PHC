@@ -1,5 +1,14 @@
+###
+### Project
+###
 
 *.json
+**/result
+isaacgym/
+
+###
+### Python
+###
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
