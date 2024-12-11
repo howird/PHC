@@ -1,9 +1,9 @@
-
 import glob
 import os
 import sys
 import pdb
 import os.path as osp
+
 sys.path.append(os.getcwd())
 
 import numpy as np
@@ -20,7 +20,9 @@ from smpl_sim.smpllib.smpl_eval import compute_metrics_lite
 from rl_games.common.tr_helpers import unsqueeze_obs
 from datetime import datetime
 import copy
+
 COLLECT_Z = False
+
 
 class IMAMPPlayerContinuous(amp_players.AMPPlayerContinuous):
     def __init__(self, config):
@@ -38,7 +40,9 @@ class IMAMPPlayerContinuous(amp_players.AMPPlayerContinuous):
             self.zs, self.zs_all = [], []
 
         humanoid_env = self.env.task
-        humanoid_env._termination_distances[:] = 0.5 # if not humanoid_env.strict_eval else 0.25 # ZL: use UHC's termination distance
+        humanoid_env._termination_distances[:] = (
+            0.5  # if not humanoid_env.strict_eval else 0.25 # ZL: use UHC's termination distance
+        )
         humanoid_env._recovery_episode_prob, humanoid_env._fall_init_prob = 0, 0
 
         if humanoid_env.collect_dataset:
@@ -51,101 +55,172 @@ class IMAMPPlayerContinuous(amp_players.AMPPlayerContinuous):
 
         if flags.im_eval:
             self.success_rate = 0
-            self.pbar = tqdm(range(humanoid_env._motion_lib._num_unique_motions // humanoid_env.num_envs))
+            self.pbar = tqdm(
+                range(
+                    humanoid_env._motion_lib._num_unique_motions
+                    // humanoid_env.num_envs
+                )
+            )
             humanoid_env.zero_out_far = False
             humanoid_env.zero_out_far_train = False
-            
+
             if len(humanoid_env._reset_bodies_id) > 15:
-                humanoid_env._reset_bodies_id = humanoid_env._eval_track_bodies_id  # Following UHC. Only do it for full body, not for three point/two point trackings. 
-            
+                humanoid_env._reset_bodies_id = humanoid_env._eval_track_bodies_id  # Following UHC. Only do it for full body, not for three point/two point trackings.
+
             humanoid_env.cycle_motion = False
             self.print_stats = False
-        
+
         # joblib.dump({"mlp": self.model.a2c_network.actor_mlp, "mu": self.model.a2c_network.mu}, "single_model.pkl") # ZL: for saving part of the model.
         return
 
     def _post_step(self, info, done):
         super()._post_step(info)
-        
-        
+
         # modify done such that games will exit and reset.
         if flags.im_eval:
-
             humanoid_env = self.env.task
-            
-            termination_state = torch.logical_and(self.curr_stpes <= humanoid_env._motion_lib.get_motion_num_steps() - 1, info["terminate"]) # if terminate after the last frame, then it is not a termination. curr_step is one step behind simulation. 
+
+            termination_state = torch.logical_and(
+                self.curr_stpes <= humanoid_env._motion_lib.get_motion_num_steps() - 1,
+                info["terminate"],
+            )  # if terminate after the last frame, then it is not a termination. curr_step is one step behind simulation.
             # termination_state = info["terminate"]
-            self.terminate_state = torch.logical_or(termination_state, self.terminate_state)
+            self.terminate_state = torch.logical_or(
+                termination_state, self.terminate_state
+            )
             if (~self.terminate_state).sum() > 0:
                 max_possible_id = humanoid_env._motion_lib._num_unique_motions - 1
                 curr_ids = humanoid_env._motion_lib._curr_motion_ids
-                if (max_possible_id == curr_ids).sum() > 0: # When you are running out of motions. 
+                if (
+                    max_possible_id == curr_ids
+                ).sum() > 0:  # When you are running out of motions.
                     bound = (max_possible_id == curr_ids).nonzero()[0] + 1
                     if (~self.terminate_state[:bound]).sum() > 0:
-                        curr_max = humanoid_env._motion_lib.get_motion_num_steps()[:bound][~self.terminate_state[:bound]].max()
+                        curr_max = humanoid_env._motion_lib.get_motion_num_steps()[
+                            :bound
+                        ][~self.terminate_state[:bound]].max()
                     else:
-                        curr_max = (self.curr_stpes - 1)  # the ones that should be counted have teimrated
+                        curr_max = (
+                            self.curr_stpes - 1
+                        )  # the ones that should be counted have teimrated
                 else:
-                    curr_max = humanoid_env._motion_lib.get_motion_num_steps()[~self.terminate_state].max()
+                    curr_max = humanoid_env._motion_lib.get_motion_num_steps()[
+                        ~self.terminate_state
+                    ].max()
 
-                if self.curr_stpes >= curr_max: curr_max = self.curr_stpes + 1  # For matching up the current steps and max steps. 
+                if self.curr_stpes >= curr_max:
+                    curr_max = (
+                        self.curr_stpes + 1
+                    )  # For matching up the current steps and max steps.
             else:
                 curr_max = humanoid_env._motion_lib.get_motion_num_steps().max()
 
             if humanoid_env.collect_dataset:
-                self.obs_buf.append(info['obs_buf'])
-                self.clean_actions.append(info['clean_actions'])
-                self.env_actions.append(info['actions'])
-                self.reset_buf.append(info['reset_buf'])
+                self.obs_buf.append(info["obs_buf"])
+                self.clean_actions.append(info["clean_actions"])
+                self.env_actions.append(info["actions"])
+                self.reset_buf.append(info["reset_buf"])
 
             self.mpjpe.append(info["mpjpe"])
             self.gt_pos.append(info["body_pos_gt"])
             self.pred_pos.append(info["body_pos"])
-            if COLLECT_Z: self.zs.append(info["z"])
+            if COLLECT_Z:
+                self.zs.append(info["z"])
             self.curr_stpes += 1
 
-            if self.curr_stpes >= curr_max or self.terminate_state.sum() == humanoid_env.num_envs:
-                
+            if (
+                self.curr_stpes >= curr_max
+                or self.terminate_state.sum() == humanoid_env.num_envs
+            ):
                 self.terminate_memory.append(self.terminate_state.cpu().numpy())
-                self.success_rate = (1 - np.concatenate(self.terminate_memory)[: humanoid_env._motion_lib._num_unique_motions].mean())
+                self.success_rate = (
+                    1
+                    - np.concatenate(self.terminate_memory)[
+                        : humanoid_env._motion_lib._num_unique_motions
+                    ].mean()
+                )
 
                 # MPJPE
                 all_mpjpe = torch.stack(self.mpjpe)
                 try:
-                    assert(all_mpjpe.shape[0] == curr_max or self.terminate_state.sum() == humanoid_env.num_envs) # Max should be the same as the number of frames in the motion.
+                    assert (
+                        all_mpjpe.shape[0] == curr_max
+                        or self.terminate_state.sum() == humanoid_env.num_envs
+                    )  # Max should be the same as the number of frames in the motion.
                 except:
-                    import ipdb; ipdb.set_trace()
-                    print('??')
+                    import ipdb
 
-                all_mpjpe = [all_mpjpe[: (i - 1), idx].mean() for idx, i in enumerate(humanoid_env._motion_lib.get_motion_num_steps())] # -1 since we do not count the first frame. 
+                    ipdb.set_trace()
+                    print("??")
+
+                all_mpjpe = [
+                    all_mpjpe[: (i - 1), idx].mean()
+                    for idx, i in enumerate(
+                        humanoid_env._motion_lib.get_motion_num_steps()
+                    )
+                ]  # -1 since we do not count the first frame.
                 all_body_pos_pred = np.stack(self.pred_pos)
-                all_body_pos_pred = [all_body_pos_pred[: (i - 1), idx] for idx, i in enumerate(humanoid_env._motion_lib.get_motion_num_steps())]
+                all_body_pos_pred = [
+                    all_body_pos_pred[: (i - 1), idx]
+                    for idx, i in enumerate(
+                        humanoid_env._motion_lib.get_motion_num_steps()
+                    )
+                ]
                 all_body_pos_gt = np.stack(self.gt_pos)
-                all_body_pos_gt = [all_body_pos_gt[: (i - 1), idx] for idx, i in enumerate(humanoid_env._motion_lib.get_motion_num_steps())]
+                all_body_pos_gt = [
+                    all_body_pos_gt[: (i - 1), idx]
+                    for idx, i in enumerate(
+                        humanoid_env._motion_lib.get_motion_num_steps()
+                    )
+                ]
 
                 if COLLECT_Z:
                     all_zs = torch.stack(self.zs)
-                    all_zs = [all_zs[: (i - 1), idx] for idx, i in enumerate(humanoid_env._motion_lib.get_motion_num_steps())]
+                    all_zs = [
+                        all_zs[: (i - 1), idx]
+                        for idx, i in enumerate(
+                            humanoid_env._motion_lib.get_motion_num_steps()
+                        )
+                    ]
                     self.zs_all += all_zs
 
-
                 if humanoid_env.collect_dataset:
-                    all_obs_buf = np.stack(self.obs_buf) # Time, batch, obs
-                    all_obs_buf = [all_obs_buf[: (i - 1), idx] for idx, i in enumerate(humanoid_env._motion_lib.get_motion_num_steps())]
+                    all_obs_buf = np.stack(self.obs_buf)  # Time, batch, obs
+                    all_obs_buf = [
+                        all_obs_buf[: (i - 1), idx]
+                        for idx, i in enumerate(
+                            humanoid_env._motion_lib.get_motion_num_steps()
+                        )
+                    ]
                     self.obs_buf_all += all_obs_buf
 
-                    all_clean_actions = np.stack(self.clean_actions) 
-                    all_clean_actions = [all_clean_actions[: (i - 1), idx] for idx, i in enumerate(humanoid_env._motion_lib.get_motion_num_steps())]
+                    all_clean_actions = np.stack(self.clean_actions)
+                    all_clean_actions = [
+                        all_clean_actions[: (i - 1), idx]
+                        for idx, i in enumerate(
+                            humanoid_env._motion_lib.get_motion_num_steps()
+                        )
+                    ]
                     self.clean_actions_all += all_clean_actions
-                    
+
                     all_actions = np.stack(self.env_actions)
-                    all_actions = [all_actions[: (i - 1), idx] for idx, i in enumerate(humanoid_env._motion_lib.get_motion_num_steps())]
+                    all_actions = [
+                        all_actions[: (i - 1), idx]
+                        for idx, i in enumerate(
+                            humanoid_env._motion_lib.get_motion_num_steps()
+                        )
+                    ]
                     self.actions_all += all_actions
 
                     all_reset_buf = np.stack(self.reset_buf)
-                    all_reset_buf = [all_reset_buf[: (i - 1), idx] for idx, i in enumerate(humanoid_env._motion_lib.get_motion_num_steps())]
+                    all_reset_buf = [
+                        all_reset_buf[: (i - 1), idx]
+                        for idx, i in enumerate(
+                            humanoid_env._motion_lib.get_motion_num_steps()
+                        )
+                    ]
                     self.reset_buf_all += all_reset_buf
-                    
+
                     self.keys_all += humanoid_env._motion_lib.curr_motion_keys.tolist()
 
                     self.motion_length_all += [obs.shape[0] for obs in all_obs_buf]
@@ -153,34 +228,69 @@ class IMAMPPlayerContinuous(amp_players.AMPPlayerContinuous):
                 self.mpjpe_all.append(all_mpjpe)
                 self.pred_pos_all += all_body_pos_pred
                 self.gt_pos_all += all_body_pos_gt
-                
 
-                if (humanoid_env.start_idx + humanoid_env.num_envs >= humanoid_env._motion_lib._num_unique_motions):
+                if (
+                    humanoid_env.start_idx + humanoid_env.num_envs
+                    >= humanoid_env._motion_lib._num_unique_motions
+                ):
                     terminate_hist = np.concatenate(self.terminate_memory)
-                    succ_idxes = np.nonzero(~terminate_hist[: humanoid_env._motion_lib._num_unique_motions])[0].tolist()
+                    succ_idxes = np.nonzero(
+                        ~terminate_hist[: humanoid_env._motion_lib._num_unique_motions]
+                    )[0].tolist()
 
-                    pred_pos_all_succ = [(self.pred_pos_all[:humanoid_env._motion_lib._num_unique_motions])[i] for i in succ_idxes]
-                    gt_pos_all_succ = [(self.gt_pos_all[: humanoid_env._motion_lib._num_unique_motions])[i] for i in succ_idxes]
+                    pred_pos_all_succ = [
+                        (
+                            self.pred_pos_all[
+                                : humanoid_env._motion_lib._num_unique_motions
+                            ]
+                        )[i]
+                        for i in succ_idxes
+                    ]
+                    gt_pos_all_succ = [
+                        (
+                            self.gt_pos_all[
+                                : humanoid_env._motion_lib._num_unique_motions
+                            ]
+                        )[i]
+                        for i in succ_idxes
+                    ]
 
-                    pred_pos_all = self.pred_pos_all[:humanoid_env._motion_lib._num_unique_motions]
-                    gt_pos_all = self.gt_pos_all[: humanoid_env._motion_lib._num_unique_motions]
+                    pred_pos_all = self.pred_pos_all[
+                        : humanoid_env._motion_lib._num_unique_motions
+                    ]
+                    gt_pos_all = self.gt_pos_all[
+                        : humanoid_env._motion_lib._num_unique_motions
+                    ]
 
                     # np.sum([i.shape[0] for i in self.pred_pos_all[:humanoid_env._motion_lib._num_unique_motions]])
                     # humanoid_env._motion_lib.get_motion_num_steps().sum()
 
-                    failed_keys = humanoid_env._motion_lib._motion_data_keys[terminate_hist[: humanoid_env._motion_lib._num_unique_motions]]
-                    success_keys = humanoid_env._motion_lib._motion_data_keys[~terminate_hist[: humanoid_env._motion_lib._num_unique_motions]]
+                    failed_keys = humanoid_env._motion_lib._motion_data_keys[
+                        terminate_hist[: humanoid_env._motion_lib._num_unique_motions]
+                    ]
+                    success_keys = humanoid_env._motion_lib._motion_data_keys[
+                        ~terminate_hist[: humanoid_env._motion_lib._num_unique_motions]
+                    ]
                     # print("failed", humanoid_env._motion_lib._motion_data_keys[np.concatenate(self.terminate_memory)[:humanoid_env._motion_lib._num_unique_motions]])
                     if flags.real_traj:
-                        pred_pos_all = [i[:, humanoid_env._reset_bodies_id] for i in pred_pos_all]
-                        gt_pos_all = [i[:, humanoid_env._reset_bodies_id] for i in gt_pos_all]
-                        pred_pos_all_succ = [i[:, humanoid_env._reset_bodies_id] for i in pred_pos_all_succ]
-                        gt_pos_all_succ = [i[:, humanoid_env._reset_bodies_id] for i in gt_pos_all_succ]
-                        
-                        
-                        
+                        pred_pos_all = [
+                            i[:, humanoid_env._reset_bodies_id] for i in pred_pos_all
+                        ]
+                        gt_pos_all = [
+                            i[:, humanoid_env._reset_bodies_id] for i in gt_pos_all
+                        ]
+                        pred_pos_all_succ = [
+                            i[:, humanoid_env._reset_bodies_id]
+                            for i in pred_pos_all_succ
+                        ]
+                        gt_pos_all_succ = [
+                            i[:, humanoid_env._reset_bodies_id] for i in gt_pos_all_succ
+                        ]
+
                     metrics = compute_metrics_lite(pred_pos_all, gt_pos_all)
-                    metrics_succ = compute_metrics_lite(pred_pos_all_succ, gt_pos_all_succ)
+                    metrics_succ = compute_metrics_lite(
+                        pred_pos_all_succ, gt_pos_all_succ
+                    )
 
                     metrics_all_print = {m: np.mean(v) for m, v in metrics.items()}
                     metrics_print = {m: np.mean(v) for m, v in metrics_succ.items()}
@@ -188,39 +298,81 @@ class IMAMPPlayerContinuous(amp_players.AMPPlayerContinuous):
                     print("------------------------------------------")
                     print("------------------------------------------")
                     print(f"Success Rate: {self.success_rate:.10f}")
-                    print("All: ", " \t".join([f"{k}: {v:.3f}" for k, v in metrics_all_print.items()]))
-                    print("Succ: "," \t".join([f"{k}: {v:.3f}" for k, v in metrics_print.items()]))
+                    print(
+                        "All: ",
+                        " \t".join(
+                            [f"{k}: {v:.3f}" for k, v in metrics_all_print.items()]
+                        ),
+                    )
+                    print(
+                        "Succ: ",
+                        " \t".join([f"{k}: {v:.3f}" for k, v in metrics_print.items()]),
+                    )
                     # print(1 - self.terminate_state.sum() / self.terminate_state.shape[0])
-                    print(self.config['network_path'])
+                    print(self.config["network_path"])
                     if COLLECT_Z:
-                        zs_all = self.zs_all[:humanoid_env._motion_lib._num_unique_motions]
-                        zs_dump = {k: zs_all[idx].cpu().numpy() for idx, k in enumerate(humanoid_env._motion_lib._motion_data_keys)}
-                        joblib.dump(zs_dump, osp.join(self.config['network_path'], "zs_run.pkl"))
+                        zs_all = self.zs_all[
+                            : humanoid_env._motion_lib._num_unique_motions
+                        ]
+                        zs_dump = {
+                            k: zs_all[idx].cpu().numpy()
+                            for idx, k in enumerate(
+                                humanoid_env._motion_lib._motion_data_keys
+                            )
+                        }
+                        joblib.dump(
+                            zs_dump, osp.join(self.config["network_path"], "zs_run.pkl")
+                        )
 
                     if humanoid_env.collect_dataset:
-                        motion_file = humanoid_env.cfg.env.motion_file.split('/')[-1].split('.')[0]
-                        dump_dir = osp.join(self.config['network_path'], "phc_act", motion_file, f"noise_{humanoid_env.add_action_noise}_{humanoid_env.action_noise_std}_{datetime.now().strftime('%Y-%m-%d-%H:%M:%S')}.pkl")
-                        os.makedirs(osp.join(self.config['network_path'], "phc_act", motion_file), exist_ok=True)
+                        motion_file = humanoid_env.cfg.env.motion_file.split("/")[
+                            -1
+                        ].split(".")[0]
+                        dump_dir = osp.join(
+                            self.config["network_path"],
+                            "phc_act",
+                            motion_file,
+                            f"noise_{humanoid_env.add_action_noise}_{humanoid_env.action_noise_std}_{datetime.now().strftime('%Y-%m-%d-%H:%M:%S')}.pkl",
+                        )
+                        os.makedirs(
+                            osp.join(
+                                self.config["network_path"], "phc_act", motion_file
+                            ),
+                            exist_ok=True,
+                        )
                         print("Dumping to: ", dump_dir)
-                        joblib.dump({
-                                "obs": self.obs_buf_all, 
-                                "clean_action": self.clean_actions_all, 
+                        joblib.dump(
+                            {
+                                "obs": self.obs_buf_all,
+                                "clean_action": self.clean_actions_all,
                                 "env_action": self.actions_all,
                                 "key_names": np.array(self.keys_all),
                                 "motion_lengths": np.array(self.motion_length_all),
-                                "reset": np.concatenate(self.reset_buf_all), 
+                                "reset": np.concatenate(self.reset_buf_all),
                                 "running_mean": self.running_mean_std.state_dict(),
                                 "config": humanoid_env.cfg,
-                                }, dump_dir, compress=True)
+                            },
+                            dump_dir,
+                            compress=True,
+                        )
                         exit()
 
-                    import ipdb; ipdb.set_trace()
+                    import ipdb
 
-                    joblib.dump(failed_keys, osp.join(self.config['network_path'], "failed.pkl"))
-                    joblib.dump(success_keys, osp.join(self.config['network_path'], "long_succ.pkl"))
+                    ipdb.set_trace()
+
+                    joblib.dump(
+                        failed_keys, osp.join(self.config["network_path"], "failed.pkl")
+                    )
+                    joblib.dump(
+                        success_keys,
+                        osp.join(self.config["network_path"], "long_succ.pkl"),
+                    )
                     print("....")
 
-                done[:] = 1  # Turning all of the sequences done and reset for the next batch of eval.
+                done[:] = (
+                    1  # Turning all of the sequences done and reset for the next batch of eval.
+                )
 
                 humanoid_env.forward_motion_samples()
                 self.terminate_state = torch.zeros(
@@ -229,28 +381,38 @@ class IMAMPPlayerContinuous(amp_players.AMPPlayerContinuous):
 
                 self.pbar.update(1)
                 self.pbar.refresh()
-                self.mpjpe, self.gt_pos, self.pred_pos,  = [], [], []
-                if humanoid_env.collect_dataset: 
-                    self.obs_buf, self.env_actions, self.clean_actions, self.reset_buf, self.keys = [], [], [], [], []
-                if COLLECT_Z: self.zs = []
+                (
+                    self.mpjpe,
+                    self.gt_pos,
+                    self.pred_pos,
+                ) = [], [], []
+                if humanoid_env.collect_dataset:
+                    (
+                        self.obs_buf,
+                        self.env_actions,
+                        self.clean_actions,
+                        self.reset_buf,
+                        self.keys,
+                    ) = [], [], [], [], []
+                if COLLECT_Z:
+                    self.zs = []
                 self.curr_stpes = 0
-
 
             update_str = f"Terminated: {self.terminate_state.sum().item()} | max frames: {curr_max} | steps {self.curr_stpes} | Start: {humanoid_env.start_idx} | Succ rate: {self.success_rate:.3f} | Mpjpe: {np.mean(self.mpjpe_all) * 1000:.3f}"
             self.pbar.set_description(update_str)
 
         return done
-    
+
     def get_z(self, obs_dict):
-        obs = obs_dict['obs']
+        obs = obs_dict["obs"]
         if self.has_batch_dimension == False:
             obs = unsqueeze_obs(obs)
         obs = self._preproc_obs(obs)
         input_dict = {
-            'is_train': False,
-            'prev_actions': None,
-            'obs': obs,
-            'rnn_states': self.states
+            "is_train": False,
+            "prev_actions": None,
+            "obs": obs,
+            "rnn_states": self.states,
         }
         with torch.no_grad():
             z = self.model.a2c_network.eval_z(input_dict)
@@ -300,13 +462,14 @@ class IMAMPPlayerContinuous(amp_players.AMPPlayerContinuous):
                 for n in range(self.max_steps):
                     obs_dict = self.env_reset(done_indices)
 
-
-                    if COLLECT_Z: z = self.get_z(obs_dict)
-                        
+                    if COLLECT_Z:
+                        z = self.get_z(obs_dict)
 
                     if has_masks:
                         masks = self.env.get_action_mask()
-                        action = self.get_masked_action(obs_dict, masks, is_determenistic)
+                        action = self.get_masked_action(
+                            obs_dict, masks, is_determenistic
+                        )
                     else:
                         action = self.get_action(obs_dict, is_determenistic)
 
@@ -315,13 +478,14 @@ class IMAMPPlayerContinuous(amp_players.AMPPlayerContinuous):
                     cr += r
                     steps += 1
 
-                    if COLLECT_Z: info['z'] = z
+                    if COLLECT_Z:
+                        info["z"] = z
                     done = self._post_step(info, done.clone())
 
                     if render:
                         self.env.render(mode="human")
                         time.sleep(self.render_sleep)
-                        
+
                     all_done_indices = done.nonzero(as_tuple=False)
                     done_indices = all_done_indices[:: self.num_agents]
                     done_count = len(done_indices)
@@ -352,9 +516,21 @@ class IMAMPPlayerContinuous(amp_players.AMPPlayerContinuous):
                                 game_res = info.get("scores", 0.5)
                         if self.print_stats:
                             if print_game_res:
-                                print("reward:", cur_rewards / done_count, "steps:", cur_steps / done_count, "w:", game_res,)
+                                print(
+                                    "reward:",
+                                    cur_rewards / done_count,
+                                    "steps:",
+                                    cur_steps / done_count,
+                                    "w:",
+                                    game_res,
+                                )
                             else:
-                                print("reward:", cur_rewards / done_count, "steps:", cur_steps / done_count,)
+                                print(
+                                    "reward:",
+                                    cur_rewards / done_count,
+                                    "steps:",
+                                    cur_steps / done_count,
+                                )
 
                         sum_game_res += game_res
                         # if batch_size//self.num_agents == 1 or games_played >= n_games:

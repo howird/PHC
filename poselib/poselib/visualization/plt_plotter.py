@@ -9,6 +9,7 @@
 The matplotlib plotter implementation for all the primitive tasks (in our case: lines and
 dots)
 """
+
 from typing import Any, Callable, Dict, List
 
 import matplotlib.pyplot as plt
@@ -110,7 +111,7 @@ class Matplotlib2DPlotter(BasePlotter):
                 *Matplotlib2DPlotter._lines_extract_xy_impl(i, lines_task),
                 color=color,
                 linewidth=lines_task.line_width,
-                alpha=lines_task.alpha
+                alpha=lines_task.alpha,
             )[0]
             for i in range(len(lines_task))
         ]
@@ -150,7 +151,7 @@ class Matplotlib2DPlotter(BasePlotter):
                 *Matplotlib2DPlotter._trail_extract_xy_impl(i, trail_task),
                 color=trail_task.color,
                 linewidth=trail_task.line_width,
-                alpha=trail_task.alpha * (1.0 - i / (trail_length - 1))
+                alpha=trail_task.alpha * (1.0 - i / (trail_length - 1)),
             )[0]
             for i in range(trail_length)
         ]
@@ -305,7 +306,7 @@ class Matplotlib3DPlotter(BasePlotter):
                 *Matplotlib3DPlotter._lines_extract_xyz_impl(i, lines_task),
                 color=color,
                 linewidth=lines_task.line_width,
-                alpha=lines_task.alpha
+                alpha=lines_task.alpha,
             )[0]
             for i in range(len(lines_task))
         ]
@@ -348,7 +349,7 @@ class Matplotlib3DPlotter(BasePlotter):
                 *Matplotlib3DPlotter._trail_extract_xyz_impl(i, trail_task),
                 color=trail_task.color,
                 linewidth=trail_task.line_width,
-                alpha=trail_task.alpha * (1.0 - i / (trail_length - 1))
+                alpha=trail_task.alpha * (1.0 - i / (trail_length - 1)),
             )[0]
             for i in range(trail_length)
         ]

@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 
+
 class MLP(nn.Module):
     def __init__(self, input_dim, output_dim, units, activation):
         """
@@ -13,7 +14,7 @@ class MLP(nn.Module):
         - activation: A string representing the activation function to be used after each layer.
         """
         super(MLP, self).__init__()
-        
+
         layers = []
         activation_fn = self._get_activation(activation)
 
@@ -24,7 +25,7 @@ class MLP(nn.Module):
 
         # Hidden layers
         for i in range(len(units) - 1):
-            layers.append(nn.Linear(units[i], units[i+1]))
+            layers.append(nn.Linear(units[i], units[i + 1]))
             if activation_fn is not None:
                 layers.append(activation_fn)
 
@@ -57,14 +58,20 @@ class MLP(nn.Module):
     def forward(self, x):
         return self.model(x)
 
+
 def main():
     input_dim = 10  # Number of input features
     output_dim = 5  # Number of output features
-    hidden_units = [20, 30, 40]  # Example: 20 units -> 30 units -> 40 units in hidden layers
+    hidden_units = [
+        20,
+        30,
+        40,
+    ]  # Example: 20 units -> 30 units -> 40 units in hidden layers
     activation = "silu"  # Single activation function for all layers
 
     model = MLP(input_dim, output_dim, hidden_units, activation)
     print(model)
+
 
 if __name__ == "__main__":
     main()

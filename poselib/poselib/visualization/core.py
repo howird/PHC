@@ -9,6 +9,7 @@
 The base abstract classes for plotter and the plotting tasks. It describes how the plotter
 deals with the tasks in the general cases
 """
+
 from typing import List
 
 
@@ -32,8 +33,7 @@ class BasePlotterTask(object):
         return self._task_name + "/" + name
 
     def __iter__(self):
-        """Should override this function to return a list of task primitives
-        """
+        """Should override this function to return a list of task primitives"""
         raise NotImplementedError
 
 

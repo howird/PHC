@@ -8,6 +8,7 @@
 """
 This is where all the task primitives are defined
 """
+
 import numpy as np
 
 from .core import BasePlotterTask
@@ -189,4 +190,3 @@ class Draw3DTrail(DrawXDTrail):
     @property
     def dim(self):
         return 3
-

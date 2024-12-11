@@ -31,10 +31,12 @@ import numpy as np
 import torch
 from phc.env.tasks.vec_task import VecTaskCPU, VecTaskGPU, VecTaskPython
 
+
 class VecTaskCPUWrapper(VecTaskCPU):
     def __init__(self, task, rl_device, sync_frame_time=False, clip_observations=5.0):
         super().__init__(task, rl_device, sync_frame_time, clip_observations)
         return
+
 
 class VecTaskGPUWrapper(VecTaskGPU):
     def __init__(self, task, rl_device, clip_observations=5.0):
@@ -46,30 +48,38 @@ class VecTaskPythonWrapper(VecTaskPython):
     def __init__(self, task, rl_device, clip_observations=5.0):
         super().__init__(task, rl_device, clip_observations)
 
-        self._amp_obs_space = spaces.Box(np.ones(task.get_num_amp_obs()) * -np.Inf, np.ones(task.get_num_amp_obs()) * np.Inf)
-        
-        self._enc_amp_obs_space = spaces.Box(np.ones(task.get_num_enc_amp_obs()) * -np.Inf, np.ones(task.get_num_enc_amp_obs()) * np.Inf)
+        self._amp_obs_space = spaces.Box(
+            np.ones(task.get_num_amp_obs()) * -np.Inf,
+            np.ones(task.get_num_amp_obs()) * np.Inf,
+        )
+
+        self._enc_amp_obs_space = spaces.Box(
+            np.ones(task.get_num_enc_amp_obs()) * -np.Inf,
+            np.ones(task.get_num_enc_amp_obs()) * np.Inf,
+        )
         return
 
     def reset(self, env_ids=None):
         self.task.reset(env_ids)
-        return torch.clamp(self.task.obs_buf, -self.clip_obs, self.clip_obs).to(self.rl_device)
+        return torch.clamp(self.task.obs_buf, -self.clip_obs, self.clip_obs).to(
+            self.rl_device
+        )
 
     @property
     def amp_observation_space(self):
         return self._amp_obs_space
-    
+
     @property
     def enc_amp_observation_space(self):
         return self._enc_amp_obs_space
 
     def fetch_amp_obs_demo(self, num_samples):
         return self.task.fetch_amp_obs_demo(num_samples)
-    
+
     @property
     def enc_amp_observation_space(self):
         return self._enc_amp_obs_space
-    
+
     ################ Calm ################
     def fetch_amp_obs_demo_pair(self, num_samples):
         return self.task.fetch_amp_obs_demo_pair(num_samples)

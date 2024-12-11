@@ -40,7 +40,14 @@ from copy import deepcopy
 import random
 
 from isaacgym import gymapi
-from isaacgym.gymutil import get_property_setter_map, get_property_getter_map, get_default_setter_args, apply_random_samples, check_buckets, generate_random_samples
+from isaacgym.gymutil import (
+    get_property_setter_map,
+    get_property_getter_map,
+    get_default_setter_args,
+    apply_random_samples,
+    check_buckets,
+    generate_random_samples,
+)
 from isaacgym import gymtorch
 
 import numpy as np
@@ -56,13 +63,14 @@ from collections import deque
 import threading
 from tqdm import tqdm
 
-# Base class for RL tasks
-class BaseTask():
 
+# Base class for RL tasks
+class BaseTask:
     def __init__(self, cfg, enable_camera_sensors=False):
         self.headless = cfg["headless"]
         if self.headless == False and not flags.no_virtual_display:
             from pyvirtualdisplay.smartdisplay import SmartDisplay
+
             self.virtual_display = SmartDisplay(size=(1800, 990), visible=True)
             self.virtual_display.start()
 
@@ -96,12 +104,20 @@ class BaseTask():
         torch._C._jit_set_profiling_executor(False)
 
         # allocate buffers
-        self.obs_buf = torch.zeros((self.num_envs, self.num_obs), device=self.device, dtype=torch.float)
-        self.states_buf = torch.zeros((self.num_envs, self.num_states), device=self.device, dtype=torch.float)
+        self.obs_buf = torch.zeros(
+            (self.num_envs, self.num_obs), device=self.device, dtype=torch.float
+        )
+        self.states_buf = torch.zeros(
+            (self.num_envs, self.num_states), device=self.device, dtype=torch.float
+        )
         self.rew_buf = torch.zeros(self.num_envs, device=self.device, dtype=torch.float)
         self.reset_buf = torch.ones(self.num_envs, device=self.device, dtype=torch.long)
-        self.progress_buf = torch.zeros(self.num_envs, device=self.device, dtype=torch.long)
-        self.randomize_buf = torch.zeros(self.num_envs, device=self.device, dtype=torch.long)
+        self.progress_buf = torch.zeros(
+            self.num_envs, device=self.device, dtype=torch.long
+        )
+        self.randomize_buf = torch.zeros(
+            self.num_envs, device=self.device, dtype=torch.long
+        )
         self.extras = {}
 
         self.original_props = {}
@@ -138,29 +154,69 @@ class BaseTask():
             camera_props.width = 1920
             camera_props.height = 1000
             self.viewer = self.gym.create_viewer(self.sim, camera_props)
-            self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_ESCAPE, "QUIT")
-            self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_V, "toggle_viewer_sync")
-            self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_L, "toggle_video_record")
-            self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_SEMICOLON, "cancel_video_record")
+            self.gym.subscribe_viewer_keyboard_event(
+                self.viewer, gymapi.KEY_ESCAPE, "QUIT"
+            )
+            self.gym.subscribe_viewer_keyboard_event(
+                self.viewer, gymapi.KEY_V, "toggle_viewer_sync"
+            )
+            self.gym.subscribe_viewer_keyboard_event(
+                self.viewer, gymapi.KEY_L, "toggle_video_record"
+            )
+            self.gym.subscribe_viewer_keyboard_event(
+                self.viewer, gymapi.KEY_SEMICOLON, "cancel_video_record"
+            )
             self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_R, "reset")
-            self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_F, "follow")
+            self.gym.subscribe_viewer_keyboard_event(
+                self.viewer, gymapi.KEY_F, "follow"
+            )
             self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_G, "fixed")
-            self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_H, "divide_group")
-            self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_C, "print_cam")
-            self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_M, "disable_collision_reset")
-            self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_B, "fixed_path")
-            self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_N, "real_path")
-            self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_K, "show_traj")
-            self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_J, "apply_force")
-            self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_LEFT, "prev_env")
-            self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_RIGHT, "next_env")
-            self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_T, "resample_motion")
-            self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_Y, "slow_traj")
-            self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_I, "trigger_input")
-            self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_P, "show_progress")
-            self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_O, "change_color")
+            self.gym.subscribe_viewer_keyboard_event(
+                self.viewer, gymapi.KEY_H, "divide_group"
+            )
+            self.gym.subscribe_viewer_keyboard_event(
+                self.viewer, gymapi.KEY_C, "print_cam"
+            )
+            self.gym.subscribe_viewer_keyboard_event(
+                self.viewer, gymapi.KEY_M, "disable_collision_reset"
+            )
+            self.gym.subscribe_viewer_keyboard_event(
+                self.viewer, gymapi.KEY_B, "fixed_path"
+            )
+            self.gym.subscribe_viewer_keyboard_event(
+                self.viewer, gymapi.KEY_N, "real_path"
+            )
+            self.gym.subscribe_viewer_keyboard_event(
+                self.viewer, gymapi.KEY_K, "show_traj"
+            )
+            self.gym.subscribe_viewer_keyboard_event(
+                self.viewer, gymapi.KEY_J, "apply_force"
+            )
+            self.gym.subscribe_viewer_keyboard_event(
+                self.viewer, gymapi.KEY_LEFT, "prev_env"
+            )
+            self.gym.subscribe_viewer_keyboard_event(
+                self.viewer, gymapi.KEY_RIGHT, "next_env"
+            )
+            self.gym.subscribe_viewer_keyboard_event(
+                self.viewer, gymapi.KEY_T, "resample_motion"
+            )
+            self.gym.subscribe_viewer_keyboard_event(
+                self.viewer, gymapi.KEY_Y, "slow_traj"
+            )
+            self.gym.subscribe_viewer_keyboard_event(
+                self.viewer, gymapi.KEY_I, "trigger_input"
+            )
+            self.gym.subscribe_viewer_keyboard_event(
+                self.viewer, gymapi.KEY_P, "show_progress"
+            )
+            self.gym.subscribe_viewer_keyboard_event(
+                self.viewer, gymapi.KEY_O, "change_color"
+            )
 
-            self.gym.subscribe_viewer_keyboard_event(self.viewer, gymapi.KEY_SPACE, "PAUSE")
+            self.gym.subscribe_viewer_keyboard_event(
+                self.viewer, gymapi.KEY_SPACE, "PAUSE"
+            )
 
             # set the camera position based on up axis
             sim_params = self.gym.get_sim_params(self.sim)
@@ -178,7 +234,9 @@ class BaseTask():
         self.max_num_camera = 10
         self.viewing_env_idx = 0
         for idx, env in enumerate(self.envs):
-            self.recorder_camera_handles.append(self.gym.create_camera_sensor(env, gymapi.CameraProperties()))
+            self.recorder_camera_handles.append(
+                self.gym.create_camera_sensor(env, gymapi.CameraProperties())
+            )
             if idx > self.max_num_camera:
                 break
 
@@ -197,7 +255,7 @@ class BaseTask():
 
     # set gravity based on up axis and return axis index
     def set_sim_params_up_axis(self, sim_params, axis):
-        if axis == 'z':
+        if axis == "z":
             sim_params.up_axis = gymapi.UP_AXIS_Z
             sim_params.gravity.x = 0
             sim_params.gravity.y = 0
@@ -206,7 +264,9 @@ class BaseTask():
         return 1
 
     def create_sim(self, compute_device, graphics_device, physics_engine, sim_params):
-        sim = self.gym.create_sim(compute_device, graphics_device, physics_engine, sim_params)
+        sim = self.gym.create_sim(
+            compute_device, graphics_device, physics_engine, sim_params
+        )
         if sim is None:
             print("*** Failed to create sim")
             quit()
@@ -214,8 +274,8 @@ class BaseTask():
         return sim
 
     def step(self, actions):
-        if self.dr_randomizations.get('actions', None):
-            actions = self.dr_randomizations['actions']['noise_lambda'](actions)
+        if self.dr_randomizations.get("actions", None):
+            actions = self.dr_randomizations["actions"]["noise_lambda"](actions)
         # apply actions
         self.pre_physics_step(actions)
 
@@ -223,15 +283,16 @@ class BaseTask():
         self._physics_step()
 
         # to fix!
-        if self.device == 'cpu':
+        if self.device == "cpu":
             self.gym.fetch_results(self.sim, True)
 
         # compute observations, rewards, resets, ...
         self.post_physics_step()
-        
 
-        if self.dr_randomizations.get('observations', None):
-            self.obs_buf = self.dr_randomizations['observations']['noise_lambda'](self.obs_buf)
+        if self.dr_randomizations.get("observations", None):
+            self.obs_buf = self.dr_randomizations["observations"]["noise_lambda"](
+                self.obs_buf
+            )
 
     def get_states(self):
         return self.states_buf
@@ -257,42 +318,43 @@ class BaseTask():
         loop.run_until_complete(self.talk())
         loop.run_forever()
 
-    #print(URL)
+    # print(URL)
     async def talk(self):
-        URL = 'http://klab-cereal.pc.cs.cmu.edu:8080/ws'
+        URL = "http://klab-cereal.pc.cs.cmu.edu:8080/ws"
         print("Starting websocket client")
         session = aiohttp.ClientSession()
         async with session.ws_connect(URL) as ws:
             async for msg in ws:
                 if msg.type == aiohttp.WSMsgType.TEXT:
-                    if msg.data == 'close cmd':
+                    if msg.data == "close cmd":
                         await ws.close()
                         break
                     else:
                         print(msg.data)
                         try:
                             msg = json.loads(msg.data)
-                            if msg['action'] == 'reset':
+                            if msg["action"] == "reset":
                                 self.reset()
-                            elif msg['action'] == 'start_record':
+                            elif msg["action"] == "start_record":
                                 if self.recording:
                                     print("Already recording")
                                 else:
                                     self.recording = True
                                     self.recording_state_change = True
-                            elif msg['action'] == 'end_record':
+                            elif msg["action"] == "end_record":
                                 if not self.recording:
                                     print("Not recording")
                                 else:
                                     self.recording = False
                                     self.recording_state_change = True
-                            elif msg['action'] == 'set_env':
-                                query = msg['query']
-                                env_id = query['env']
+                            elif msg["action"] == "set_env":
+                                query = msg["query"]
+                                env_id = query["env"]
                                 self.viewing_env_idx = int(env_id)
                                 print("view env idx: ", self.viewing_env_idx)
                         except:
                             import ipdb
+
                             ipdb.set_trace()
                             print("error parsing server message")
                 elif msg.type == aiohttp.WSMsgType.CLOSED:
@@ -300,16 +362,22 @@ class BaseTask():
                 elif msg.type == aiohttp.WSMsgType.ERROR:
                     break
 
-    #print(URL)
+    # print(URL)
     async def video_stream(self):
-        URL = 'http://klab-cereal.pc.cs.cmu.edu:8080/ws'
+        URL = "http://klab-cereal.pc.cs.cmu.edu:8080/ws"
         print("Starting websocket client")
         session = aiohttp.ClientSession()
         async with session.ws_connect(URL) as ws:
             await ws.send_str("Start")
             while True:
-                if "color_image" in self.__dict__ and not self.color_image is None and len(self.color_image.shape) == 3:
-                    image = cv2.resize(self.color_image, (800, 450), interpolation=cv2.INTER_AREA)
+                if (
+                    "color_image" in self.__dict__
+                    and not self.color_image is None
+                    and len(self.color_image.shape) == 3
+                ):
+                    image = cv2.resize(
+                        self.color_image, (800, 450), interpolation=cv2.INTER_AREA
+                    )
                     await ws.send_bytes(image.tobytes())
                 else:
                     print("no image yet")
@@ -323,7 +391,6 @@ class BaseTask():
 
             # check for keyboard events
             for evt in self.gym.query_viewer_action_events(self.viewer):
-
                 if evt.action == "QUIT" and evt.value > 0:
                     sys.exit()
                 if evt.action == "PAUSE" and evt.value > 0:
@@ -366,50 +433,66 @@ class BaseTask():
                 elif evt.action == "trigger_input" and evt.value > 0:
                     flags.trigger_input = not flags.trigger_input
                     self.change_char_color()
-                    print("show_traj: ", flags.show_traj) 
+                    print("show_traj: ", flags.show_traj)
                 elif evt.action == "show_progress" and evt.value > 0:
-                    print("Progress ", self.progress_buf) 
+                    print("Progress ", self.progress_buf)
                 elif evt.action == "apply_force" and evt.value > 0:
-                    forces = torch.zeros((1, self._rigid_body_state.shape[0], 3), device=self.device, dtype=torch.float)
-                    torques = torch.zeros((1, self._rigid_body_state.shape[0], 3), device=self.device, dtype=torch.float)
+                    forces = torch.zeros(
+                        (1, self._rigid_body_state.shape[0], 3),
+                        device=self.device,
+                        dtype=torch.float,
+                    )
+                    torques = torch.zeros(
+                        (1, self._rigid_body_state.shape[0], 3),
+                        device=self.device,
+                        dtype=torch.float,
+                    )
                     # forces[:, 8, :] = -800
                     for i in range(self._rigid_body_state.shape[0] // self.num_bodies):
                         forces[:, i * self.num_bodies + 3, :] = -3500
                         forces[:, i * self.num_bodies + 7, :] = -3500
                     # torques[:, 1, :] = 500
 
-                    self.gym.apply_rigid_body_force_tensors(self.sim, gymtorch.unwrap_tensor(forces), gymtorch.unwrap_tensor(torques), gymapi.ENV_SPACE)
-                    
+                    self.gym.apply_rigid_body_force_tensors(
+                        self.sim,
+                        gymtorch.unwrap_tensor(forces),
+                        gymtorch.unwrap_tensor(torques),
+                        gymapi.ENV_SPACE,
+                    )
+
                 elif evt.action == "prev_env" and evt.value > 0:
                     self.viewing_env_idx = (self.viewing_env_idx - 1) % self.num_envs
-                    flags.idx -= 1; print(flags.idx)
-                    
+                    flags.idx -= 1
+                    print(flags.idx)
+
                     # self.recorder_camera_handle = self.recorder_camera_handles[self.viewing_env_idx]
                     print("\nShowing env: ", self.viewing_env_idx, flags.idx)
                 elif evt.action == "next_env" and evt.value > 0:
                     self.viewing_env_idx = (self.viewing_env_idx + 1) % self.num_envs
-                    flags.idx += 1; 
+                    flags.idx += 1
                     # self.recorder_camera_handle = self.recorder_camera_handles[self.viewing_env_idx]
                     print("\nShowing env: ", self.viewing_env_idx, flags.idx)
                 elif evt.action == "resample_motion" and evt.value > 0:
                     self.resample_motions()
-                    
+
                 elif evt.action == "slow_traj" and evt.value > 0:
                     flags.slow = not flags.slow
                     print("slow_traj: ", flags.slow)
-                
+
                 elif evt.action == "change_color" and evt.value > 0:
                     self.change_char_color()
                     print("Change character color")
-            
+
             if self.recording_state_change:
                 if not self.recording:
                     if not flags.server_mode:
                         self.writer.close()
                         del self.writer
-                        
+
                     self._write_states_to_file(self.curr_states_file_name)
-                    print(f"============ Video finished writing {self.curr_states_file_name}============")
+                    print(
+                        f"============ Video finished writing {self.curr_states_file_name}============"
+                    )
 
                 else:
                     print(f"============ Writing video ============")
@@ -419,28 +502,40 @@ class BaseTask():
                 if not flags.server_mode:
                     if flags.no_virtual_display:
                         self.gym.render_all_camera_sensors(self.sim)
-                        color_image = self.gym.get_camera_image(self.sim, self.envs[self.viewing_env_idx], self.recorder_camera_handles[self.viewing_env_idx], gymapi.IMAGE_COLOR)
-                        self.color_image = color_image.reshape(color_image.shape[0], -1, 4)
+                        color_image = self.gym.get_camera_image(
+                            self.sim,
+                            self.envs[self.viewing_env_idx],
+                            self.recorder_camera_handles[self.viewing_env_idx],
+                            gymapi.IMAGE_COLOR,
+                        )
+                        self.color_image = color_image.reshape(
+                            color_image.shape[0], -1, 4
+                        )
                     else:
                         img = self.virtual_display.grab()
                         self.color_image = np.array(img)
                         H, W, C = self.color_image.shape
-                        self.color_image = self.color_image[:(H - H % 2), :(W - W % 2), :]
+                        self.color_image = self.color_image[
+                            : (H - H % 2), : (W - W % 2), :
+                        ]
 
                 if not flags.server_mode:
                     if not "writer" in self.__dict__:
-                        curr_date_time = datetime.now().strftime('%Y-%m-%d-%H:%M:%S')
+                        curr_date_time = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
                         self.curr_video_file_name = self._video_path % curr_date_time
                         self.curr_states_file_name = self._states_path % curr_date_time
                         if not flags.server_mode:
-                            self.writer = imageio.get_writer(self.curr_video_file_name, fps=int(1/self.dt), macro_block_size=None)
+                            self.writer = imageio.get_writer(
+                                self.curr_video_file_name,
+                                fps=int(1 / self.dt),
+                                macro_block_size=None,
+                            )
                     self.writer.append_data(self.color_image)
-                    
-                    
+
                 self._record_states()
 
             # fetch results
-            if self.device != 'cpu':
+            if self.device != "cpu":
                 self.gym.fetch_results(self.sim, True)
 
             # step graphics
@@ -451,7 +546,7 @@ class BaseTask():
 
             else:
                 self.gym.poll_viewer_events(self.viewer)
-                
+
         # else:
         #     if flags.server_mode:
         #         # headless server model only support rendering from one env
@@ -468,11 +563,7 @@ class BaseTask():
         #         if self.recording:
         #             self._video_queue.append(self.color_image)
         #             self._record_states()
-                    
-            
-                
-                
-                
+
     def get_actor_params_info(self, dr_params, env):
         """Returns a flat array of actor params, their names and ranges."""
         if "actor_params" not in dr_params:
@@ -485,22 +576,22 @@ class BaseTask():
         for actor, actor_properties in dr_params["actor_params"].items():
             handle = self.gym.find_actor_handle(env, actor)
             for prop_name, prop_attrs in actor_properties.items():
-                if prop_name == 'color':
+                if prop_name == "color":
                     continue  # this is set randomly
                 props = param_getters_map[prop_name](env, handle)
                 if not isinstance(props, list):
                     props = [props]
                 for prop_idx, prop in enumerate(props):
                     for attr, attr_randomization_params in prop_attrs.items():
-                        name = prop_name + '_' + str(prop_idx) + '_' + attr
-                        lo_hi = attr_randomization_params['range']
-                        distr = attr_randomization_params['distribution']
-                        if 'uniform' not in distr:
-                            lo_hi = (-1.0 * float('Inf'), float('Inf'))
+                        name = prop_name + "_" + str(prop_idx) + "_" + attr
+                        lo_hi = attr_randomization_params["range"]
+                        distr = attr_randomization_params["distribution"]
+                        if "uniform" not in distr:
+                            lo_hi = (-1.0 * float("Inf"), float("Inf"))
                         if isinstance(prop, np.ndarray):
                             for attr_idx in range(prop[attr].shape[0]):
                                 params.append(prop[attr][attr_idx])
-                                names.append(name + '_' + str(attr_idx))
+                                names.append(name + "_" + str(attr_idx))
                                 lows.append(lo_hi[0])
                                 highs.append(lo_hi[1])
                         else:
@@ -525,7 +616,11 @@ class BaseTask():
             env_ids = list(range(self.num_envs))
         else:
             do_nonenv_randomize = (self.last_step - self.last_rand_step) >= rand_freq
-            rand_envs = torch.where(self.randomize_buf >= rand_freq, torch.ones_like(self.randomize_buf), torch.zeros_like(self.randomize_buf))
+            rand_envs = torch.where(
+                self.randomize_buf >= rand_freq,
+                torch.ones_like(self.randomize_buf),
+                torch.zeros_like(self.randomize_buf),
+            )
             rand_envs = torch.logical_and(rand_envs, self.reset_buf)
             env_ids = torch.nonzero(rand_envs, as_tuple=False).squeeze(-1).tolist()
             self.randomize_buf[rand_envs] = 0
@@ -545,57 +640,81 @@ class BaseTask():
             if nonphysical_param in dr_params and do_nonenv_randomize:
                 dist = dr_params[nonphysical_param]["distribution"]
                 op_type = dr_params[nonphysical_param]["operation"]
-                sched_type = dr_params[nonphysical_param]["schedule"] if "schedule" in dr_params[nonphysical_param] else None
-                sched_step = dr_params[nonphysical_param]["schedule_steps"] if "schedule" in dr_params[nonphysical_param] else None
-                op = operator.add if op_type == 'additive' else operator.mul
+                sched_type = (
+                    dr_params[nonphysical_param]["schedule"]
+                    if "schedule" in dr_params[nonphysical_param]
+                    else None
+                )
+                sched_step = (
+                    dr_params[nonphysical_param]["schedule_steps"]
+                    if "schedule" in dr_params[nonphysical_param]
+                    else None
+                )
+                op = operator.add if op_type == "additive" else operator.mul
 
-                if sched_type == 'linear':
-                    sched_scaling = 1.0 / sched_step * \
-                        min(self.last_step, sched_step)
-                elif sched_type == 'constant':
+                if sched_type == "linear":
+                    sched_scaling = 1.0 / sched_step * min(self.last_step, sched_step)
+                elif sched_type == "constant":
                     sched_scaling = 0 if self.last_step < sched_step else 1
                 else:
                     sched_scaling = 1
 
-                if dist == 'gaussian':
+                if dist == "gaussian":
                     mu, var = dr_params[nonphysical_param]["range"]
-                    mu_corr, var_corr = dr_params[nonphysical_param].get("range_correlated", [0., 0.])
+                    mu_corr, var_corr = dr_params[nonphysical_param].get(
+                        "range_correlated", [0.0, 0.0]
+                    )
 
-                    if op_type == 'additive':
+                    if op_type == "additive":
                         mu *= sched_scaling
                         var *= sched_scaling
                         mu_corr *= sched_scaling
                         var_corr *= sched_scaling
-                    elif op_type == 'scaling':
+                    elif op_type == "scaling":
                         var = var * sched_scaling  # scale up var over time
-                        mu = mu * sched_scaling + 1.0 * \
-                            (1.0 - sched_scaling)  # linearly interpolate
+                        mu = mu * sched_scaling + 1.0 * (
+                            1.0 - sched_scaling
+                        )  # linearly interpolate
 
                         var_corr = var_corr * sched_scaling  # scale up var over time
-                        mu_corr = mu_corr * sched_scaling + 1.0 * \
-                            (1.0 - sched_scaling)  # linearly interpolate
+                        mu_corr = mu_corr * sched_scaling + 1.0 * (
+                            1.0 - sched_scaling
+                        )  # linearly interpolate
 
                     def noise_lambda(tensor, param_name=nonphysical_param):
                         params = self.dr_randomizations[param_name]
-                        corr = params.get('corr', None)
+                        corr = params.get("corr", None)
                         if corr is None:
                             corr = torch.randn_like(tensor)
-                            params['corr'] = corr
-                        corr = corr * params['var_corr'] + params['mu_corr']
-                        return op(tensor, corr + torch.randn_like(tensor) * params['var'] + params['mu'])
+                            params["corr"] = corr
+                        corr = corr * params["var_corr"] + params["mu_corr"]
+                        return op(
+                            tensor,
+                            corr
+                            + torch.randn_like(tensor) * params["var"]
+                            + params["mu"],
+                        )
 
-                    self.dr_randomizations[nonphysical_param] = {'mu': mu, 'var': var, 'mu_corr': mu_corr, 'var_corr': var_corr, 'noise_lambda': noise_lambda}
+                    self.dr_randomizations[nonphysical_param] = {
+                        "mu": mu,
+                        "var": var,
+                        "mu_corr": mu_corr,
+                        "var_corr": var_corr,
+                        "noise_lambda": noise_lambda,
+                    }
 
-                elif dist == 'uniform':
+                elif dist == "uniform":
                     lo, hi = dr_params[nonphysical_param]["range"]
-                    lo_corr, hi_corr = dr_params[nonphysical_param].get("range_correlated", [0., 0.])
+                    lo_corr, hi_corr = dr_params[nonphysical_param].get(
+                        "range_correlated", [0.0, 0.0]
+                    )
 
-                    if op_type == 'additive':
+                    if op_type == "additive":
                         lo *= sched_scaling
                         hi *= sched_scaling
                         lo_corr *= sched_scaling
                         hi_corr *= sched_scaling
-                    elif op_type == 'scaling':
+                    elif op_type == "scaling":
                         lo = lo * sched_scaling + 1.0 * (1.0 - sched_scaling)
                         hi = hi * sched_scaling + 1.0 * (1.0 - sched_scaling)
                         lo_corr = lo_corr * sched_scaling + 1.0 * (1.0 - sched_scaling)
@@ -603,24 +722,46 @@ class BaseTask():
 
                     def noise_lambda(tensor, param_name=nonphysical_param):
                         params = self.dr_randomizations[param_name]
-                        corr = params.get('corr', None)
+                        corr = params.get("corr", None)
                         if corr is None:
                             corr = torch.randn_like(tensor)
-                            params['corr'] = corr
-                        corr = corr * (params['hi_corr'] - params['lo_corr']) + params['lo_corr']
-                        return op(tensor, corr + torch.rand_like(tensor) * (params['hi'] - params['lo']) + params['lo'])
+                            params["corr"] = corr
+                        corr = (
+                            corr * (params["hi_corr"] - params["lo_corr"])
+                            + params["lo_corr"]
+                        )
+                        return op(
+                            tensor,
+                            corr
+                            + torch.rand_like(tensor) * (params["hi"] - params["lo"])
+                            + params["lo"],
+                        )
 
-                    self.dr_randomizations[nonphysical_param] = {'lo': lo, 'hi': hi, 'lo_corr': lo_corr, 'hi_corr': hi_corr, 'noise_lambda': noise_lambda}
+                    self.dr_randomizations[nonphysical_param] = {
+                        "lo": lo,
+                        "hi": hi,
+                        "lo_corr": lo_corr,
+                        "hi_corr": hi_corr,
+                        "noise_lambda": noise_lambda,
+                    }
 
         if "sim_params" in dr_params and do_nonenv_randomize:
             prop_attrs = dr_params["sim_params"]
             prop = self.gym.get_sim_params(self.sim)
 
             if self.first_randomization:
-                self.original_props["sim_params"] = {attr: getattr(prop, attr) for attr in dir(prop)}
+                self.original_props["sim_params"] = {
+                    attr: getattr(prop, attr) for attr in dir(prop)
+                }
 
             for attr, attr_randomization_params in prop_attrs.items():
-                apply_random_samples(prop, self.original_props["sim_params"], attr, attr_randomization_params, self.last_step)
+                apply_random_samples(
+                    prop,
+                    self.original_props["sim_params"],
+                    attr,
+                    attr_randomization_params,
+                    self.last_step,
+                )
 
             self.gym.set_sim_params(self.sim, prop)
 
@@ -632,8 +773,7 @@ class BaseTask():
         extern_offsets = {}
         if self.actor_params_generator is not None:
             for env_id in env_ids:
-                self.extern_actor_params[env_id] = \
-                    self.actor_params_generator.sample()
+                self.extern_actor_params[env_id] = self.actor_params_generator.sample()
                 extern_offsets[env_id] = 0
 
         for actor, actor_properties in dr_params["actor_params"].items():
@@ -643,18 +783,30 @@ class BaseTask():
                 extern_sample = self.extern_actor_params[env_id]
 
                 for prop_name, prop_attrs in actor_properties.items():
-                    if prop_name == 'color':
+                    if prop_name == "color":
                         num_bodies = self.gym.get_actor_rigid_body_count(env, handle)
                         for n in range(num_bodies):
-                            self.gym.set_rigid_body_color(env, handle, n, gymapi.MESH_VISUAL, gymapi.Vec3(random.uniform(0, 1), random.uniform(0, 1), random.uniform(0, 1)))
+                            self.gym.set_rigid_body_color(
+                                env,
+                                handle,
+                                n,
+                                gymapi.MESH_VISUAL,
+                                gymapi.Vec3(
+                                    random.uniform(0, 1),
+                                    random.uniform(0, 1),
+                                    random.uniform(0, 1),
+                                ),
+                            )
                         continue
-                    if prop_name == 'scale':
+                    if prop_name == "scale":
                         attr_randomization_params = prop_attrs
-                        sample = generate_random_samples(attr_randomization_params, 1, self.last_step, None)
+                        sample = generate_random_samples(
+                            attr_randomization_params, 1, self.last_step, None
+                        )
                         og_scale = 1
-                        if attr_randomization_params['operation'] == 'scaling':
+                        if attr_randomization_params["operation"] == "scaling":
                             new_scale = og_scale * sample
-                        elif attr_randomization_params['operation'] == 'additive':
+                        elif attr_randomization_params["operation"] == "additive":
                             new_scale = og_scale + sample
                         self.gym.set_actor_scale(env, handle, new_scale)
                         continue
@@ -662,21 +814,47 @@ class BaseTask():
                     prop = param_getters_map[prop_name](env, handle)
                     if isinstance(prop, list):
                         if self.first_randomization:
-                            self.original_props[prop_name] = [{attr: getattr(p, attr) for attr in dir(p)} for p in prop]
+                            self.original_props[prop_name] = [
+                                {attr: getattr(p, attr) for attr in dir(p)}
+                                for p in prop
+                            ]
                         for p, og_p in zip(prop, self.original_props[prop_name]):
                             for attr, attr_randomization_params in prop_attrs.items():
                                 smpl = None
                                 if self.actor_params_generator is not None:
-                                    smpl, extern_offsets[env_id] = get_attr_val_from_sample(extern_sample, extern_offsets[env_id], p, attr)
-                                apply_random_samples(p, og_p, attr, attr_randomization_params, self.last_step, smpl)
+                                    smpl, extern_offsets[env_id] = (
+                                        get_attr_val_from_sample(
+                                            extern_sample,
+                                            extern_offsets[env_id],
+                                            p,
+                                            attr,
+                                        )
+                                    )
+                                apply_random_samples(
+                                    p,
+                                    og_p,
+                                    attr,
+                                    attr_randomization_params,
+                                    self.last_step,
+                                    smpl,
+                                )
                     else:
                         if self.first_randomization:
                             self.original_props[prop_name] = deepcopy(prop)
                         for attr, attr_randomization_params in prop_attrs.items():
                             smpl = None
                             if self.actor_params_generator is not None:
-                                smpl, extern_offsets[env_id] = get_attr_val_from_sample(extern_sample, extern_offsets[env_id], prop, attr)
-                            apply_random_samples(prop, self.original_props[prop_name], attr, attr_randomization_params, self.last_step, smpl)
+                                smpl, extern_offsets[env_id] = get_attr_val_from_sample(
+                                    extern_sample, extern_offsets[env_id], prop, attr
+                                )
+                            apply_random_samples(
+                                prop,
+                                self.original_props[prop_name],
+                                attr,
+                                attr_randomization_params,
+                                self.last_step,
+                                smpl,
+                            )
 
                     setter = param_setters_map[prop_name]
                     default_args = param_setter_defaults_map[prop_name]
@@ -687,7 +865,14 @@ class BaseTask():
                 if extern_offsets[env_id] > 0:
                     extern_sample = self.extern_actor_params[env_id]
                     if extern_offsets[env_id] != extern_sample.shape[0]:
-                        print('env_id', env_id, 'extern_offset', extern_offsets[env_id], 'vs extern_sample.shape', extern_sample.shape)
+                        print(
+                            "env_id",
+                            env_id,
+                            "extern_offset",
+                            extern_offsets[env_id],
+                            "vs extern_sample.shape",
+                            extern_sample.shape,
+                        )
                         raise Exception("Invalid extern_sample size")
 
         self.first_randomization = False
@@ -712,7 +897,7 @@ def get_attr_val_from_sample(sample, offset, prop, attr):
     if sample is None:
         return None, 0
     if isinstance(prop, np.ndarray):
-        smpl = sample[offset:offset + prop[attr].shape[0]]
+        smpl = sample[offset : offset + prop[attr].shape[0]]
         return smpl, offset + prop[attr].shape[0]
     else:
         return sample[offset], offset + 1
