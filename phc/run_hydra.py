@@ -37,15 +37,15 @@ os.environ["OMP_NUM_THREADS"] = "1"
 sys.path.append(os.getcwd())
 
 
-def debugger(port=5678):
-    import debugpy
+# def debugger(port=5678):
+#     import debugpy
 
-    debugpy.listen(port)
-    print(f"Waiting for debugger attach to port: {port}")
-    debugpy.wait_for_client()
+#     debugpy.listen(port)
+#     print(f"Waiting for debugger attach to port: {port}")
+#     debugpy.wait_for_client()
 
 
-debugger()
+# debugger()
 
 from phc.utils.config import set_np_formatting, set_seed
 from phc.utils.parse_task import parse_task
@@ -303,19 +303,19 @@ def build_alg_runner(algo_observer):
     runner.model_builder.network_factory.register_builder(
         "amp", lambda **kwargs: amp_network_builder.AMPBuilder()
     )
-    runner.model_builder.network_factory.register_builder(
-        "amp_mcp", lambda **kwargs: amp_network_mcp_builder.AMPMCPBuilder()
-    )
-    runner.model_builder.network_factory.register_builder(
-        "amp_pnn", lambda **kwargs: amp_network_pnn_builder.AMPPNNBuilder()
-    )
+    # runner.model_builder.network_factory.register_builder(
+    #     "amp_mcp", lambda **kwargs: amp_network_mcp_builder.AMPMCPBuilder()
+    # )
+    # runner.model_builder.network_factory.register_builder(
+    #     "amp_pnn", lambda **kwargs: amp_network_pnn_builder.AMPPNNBuilder()
+    # )
 
-    runner.algo_factory.register_builder(
-        "im_amp", lambda **kwargs: im_amp.IMAmpAgent(**kwargs)
-    )
-    runner.player_factory.register_builder(
-        "im_amp", lambda **kwargs: im_amp_players.IMAMPPlayerContinuous(**kwargs)
-    )
+    # runner.algo_factory.register_builder(
+    #     "im_amp", lambda **kwargs: im_amp.IMAmpAgent(**kwargs)
+    # )
+    # runner.player_factory.register_builder(
+    #     "im_amp", lambda **kwargs: im_amp_players.IMAMPPlayerContinuous(**kwargs)
+    # )
 
     return runner
 

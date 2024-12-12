@@ -974,7 +974,7 @@ class AMPAgent(common_agent.CommonAgent):
 
     def _combine_rewards(self, task_rewards, amp_rewards):
         disc_r = amp_rewards["disc_rewards"]
-
+        # COMBINE REWARDS
         combined_rewards = (
             self._task_reward_w * task_rewards + self._disc_reward_w * disc_r
         )

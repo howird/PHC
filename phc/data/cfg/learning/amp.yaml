@@ -2,7 +2,7 @@ params:
   seed: 0
 
   algo:
-    name: im_amp
+    name: amp
 
   model:
     name: amp
@@ -10,6 +10,7 @@ params:
   network:
     name: amp
     separate: True
+    discrete: False
 
     space:
       continuous:
@@ -24,8 +25,8 @@ params:
         learn_sigma: False
 
     mlp:
-      units: [2048, 1536, 1024, 1024, 512, 512] # comparable paramter to z_big_task
-      activation: silu
+      units: [1024, 512]
+      activation: relu
       d2rl: False
 
       initializer:
@@ -34,12 +35,8 @@ params:
         name: None
 
     disc:
-      # units: [2048, 1024, 512]
-      # activation: silu
-      
       units: [1024, 512]
       activation: relu
-      
 
       initializer:
         name: default
@@ -62,9 +59,9 @@ params:
     learning_rate: 2e-5
     lr_schedule: constant
     score_to_win: 20000
-    max_epochs: 10000000
+    max_epochs: 20000
     save_best_after: 100
-    save_frequency: 1500
+    save_frequency: 2500
     print_stats: False
     save_intermediate: True
     entropy_coef: 0.0
@@ -72,11 +69,11 @@ params:
     grad_norm: 50.0
     e_clip: 0.2
     horizon_length: 32
-    minibatch_size: 16384
-    mini_epochs: 6
+    minibatch_size: 8192
+    mini_epochs: 5
     critic_coef: 5
     clip_value: False
-
+    
     bounds_loss_coef: 10
     amp_obs_demo_buffer_size: 200000
     amp_replay_buffer_size: 200000
@@ -94,4 +91,4 @@ params:
     disc_reward_w: 0.5
 
     player: 
-        games_num: 50000000
+      games_num: 50000000
