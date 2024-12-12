@@ -27,6 +27,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from phc.env.tasks.humanoid import Humanoid
+from phc.env.tasks.humanoid_amp_heading import HumanoidAMPHeading
 from phc.env.tasks.humanoid_amp import HumanoidAMP
 from phc.env.tasks.humanoid_amp_getup import HumanoidAMPGetup
 from phc.env.tasks.humanoid_im import HumanoidIm

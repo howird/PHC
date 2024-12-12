@@ -2533,7 +2533,7 @@ class Humanoid(BaseTask):
         return torch.clip(torques, -self.torque_limits, self.torque_limits)
 
     def _physics_step(self):
-        self.render(i=0)  # Render outside of the step function.
+        self.render()  # Render outside of the step function.
         for i in range(self.control_freq_inv):
             # self.render(i = i) # Render outside of the step function.
 

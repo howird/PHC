@@ -98,6 +98,7 @@ class HumanoidAMP(Humanoid):
         self._amp_root_height_obs = cfg["env"].get(
             "ampRootHeightObs", cfg["env"].get("root_height_obs", True)
         )
+        self._min_motion_len = cfg["env"].get("min_length", -1)
 
         self._num_amp_obs_enc_steps = cfg["env"].get(
             "numAMPEncObsSteps", self._num_amp_obs_steps
@@ -511,7 +512,7 @@ class HumanoidAMP(Humanoid):
         if self.humanoid_type in ["smpl", "smplh", "smplx"]:
             motion_lib_cfg = EasyDict(
                 {
-                    "motion_file": motion_file,
+                    "motion_file": motion_train_file,
                     "device": torch.device("cpu"),
                     "fix_height": FixHeightMode.full_fix,
                     "min_length": -1,

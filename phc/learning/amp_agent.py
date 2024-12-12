@@ -348,6 +348,7 @@ class AMPAgent(common_agent.CommonAgent):
         update_list = self.update_list
         terminated_flags = torch.zeros(self.num_actors, device=self.device)
         reward_raw = torch.zeros(1, device=self.device)
+
         for n in range(self.horizon_length):
             self.obs = self.env_reset(done_indices)
             self.experience_buffer.update_data("obses", n, self.obs["obs"])
@@ -409,6 +410,7 @@ class AMPAgent(common_agent.CommonAgent):
         mb_next_values = self.experience_buffer.tensor_dict["next_values"]
 
         mb_rewards = self.experience_buffer.tensor_dict["rewards"]
+
         mb_amp_obs = self.experience_buffer.tensor_dict["amp_obs"]
         amp_rewards = self._calc_amp_rewards(mb_amp_obs)
         mb_rewards = self._combine_rewards(mb_rewards, amp_rewards)
@@ -974,7 +976,7 @@ class AMPAgent(common_agent.CommonAgent):
         disc_r = amp_rewards["disc_rewards"]
 
         combined_rewards = (
-            self._task_reward_w * task_rewards + +self._disc_reward_w * disc_r
+            self._task_reward_w * task_rewards + self._disc_reward_w * disc_r
         )
         return combined_rewards
 
@@ -1075,11 +1077,13 @@ class AMPAgent(common_agent.CommonAgent):
 
         if "reward_raw" in train_info:
             reward_raw = train_info["reward_raw"].cpu().numpy().tolist()
-            train_info_dict["rewards/body_pos"] = reward_raw[0]
-            train_info_dict["rewards/body_rot"] = reward_raw[1]
-            train_info_dict["rewards/lin_vel"] = reward_raw[2]
-            train_info_dict["rewards/ang_vel"] = reward_raw[3]
-            train_info_dict["rewards/power"] = reward_raw[4]
+            # train_info_dict["rewards/body_pos"] = reward_raw[0]
+            # train_info_dict["rewards/body_rot"] = reward_raw[1]
+            # train_info_dict["rewards/lin_vel"] = reward_raw[2]
+            # train_info_dict["rewards/ang_vel"] = reward_raw[3]
+            # train_info_dict["rewards/power"] = reward_raw[4]
+            train_info_dict["rewards/pos_reward"] = reward_raw[0]
+            train_info_dict["rewards/heading_reward"] = reward_raw[1]
 
         if "sym_loss" in train_info:
             train_info_dict["loss/sym_loss"] = torch_ext.mean_list(
