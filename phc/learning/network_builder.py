@@ -3,11 +3,7 @@ from rl_games.algos_torch import torch_ext
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
 
-import math
-import numpy as np
 from rl_games.algos_torch.d2rl import D2RLNet
 from rl_games.algos_torch.sac_helper import SquashedNormal
 

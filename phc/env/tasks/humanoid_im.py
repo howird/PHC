@@ -2,7 +2,6 @@ import os.path as osp
 from typing import OrderedDict
 import torch
 import numpy as np
-from phc.utils.torch_utils import quat_to_tan_norm
 import phc.env.tasks.humanoid_amp_task as humanoid_amp_task
 from phc.env.tasks.humanoid_amp import HumanoidAMP, remove_base_rot
 from phc.utils.motion_lib_real import MotionLibReal
@@ -17,12 +16,9 @@ from isaacgym import gymtorch
 from isaacgym.torch_utils import *
 from phc.utils.flags import flags
 import joblib
-import gc
 from collections import defaultdict
 
 from poselib.poselib.skeleton.skeleton3d import (
-    SkeletonTree,
-    SkeletonMotion,
     SkeletonState,
 )
 from scipy.spatial.transform import Rotation as sRot
@@ -204,10 +200,7 @@ class HumanoidIm(humanoid_amp_task.HumanoidAMPTask):
             if self.humanoid_type in ["smpl", "smplh", "smplx"]:
                 from smpl_sim.smpllib.smpl_joint_names import (
                     SMPL_BONE_ORDER_NAMES,
-                    SMPLX_BONE_ORDER_NAMES,
                     SMPLH_BONE_ORDER_NAMES,
-                    SMPL_MUJOCO_NAMES,
-                    SMPLH_MUJOCO_NAMES,
                 )
 
                 if self.humanoid_type == "smpl":
@@ -408,7 +401,7 @@ class HumanoidIm(humanoid_amp_task.HumanoidAMPTask):
                         f"============ Video finished writing O3D {curr_video_file_name}============"
                     )
                 else:
-                    print(f"============ Writing video O3D ============")
+                    print("============ Writing video O3D ============")
 
                 self.recording_state_change_o3d = False
 
@@ -1595,7 +1588,7 @@ class HumanoidIm(humanoid_amp_task.HumanoidAMPTask):
         ## Cache the motion + offset
         if (
             offset is None
-            or not "motion_ids" in self.ref_motion_cache
+            or "motion_ids" not in self.ref_motion_cache
             or self.ref_motion_cache["offset"] is None
             or len(self.ref_motion_cache["motion_ids"]) != len(motion_ids)
             or len(self.ref_motion_cache["offset"]) != len(offset)
@@ -1611,7 +1604,7 @@ class HumanoidIm(humanoid_amp_task.HumanoidAMPTask):
                 motion_times.clone()
             )  # need to clone; otherwise will be overriden
             self.ref_motion_cache["offset"] = (
-                offset.clone() if not offset is None else None
+                offset.clone() if offset is not None else None
             )
         else:
             return self.ref_motion_cache

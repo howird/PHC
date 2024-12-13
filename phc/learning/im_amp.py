@@ -1,34 +1,21 @@
 import glob
 import os
 import sys
-import pdb
 import os.path as osp
 
 sys.path.append(os.getcwd())
 
-from phc.utils.running_mean_std import RunningMeanStd
-from rl_games.algos_torch import torch_ext
-from rl_games.common import a2c_common
-from rl_games.common import schedulers
-from rl_games.common import vecenv
 
 from isaacgym.torch_utils import *
 
-import time
-from datetime import datetime
 import numpy as np
-from torch import optim
 import torch
-from torch import nn
-from phc.env.tasks.humanoid_amp_task import HumanoidAMPTask
 
-import learning.replay_buffer as replay_buffer
 import phc.learning.amp_agent as amp_agent
 from phc.utils.flags import flags
 from rl_games.common.tr_helpers import unsqueeze_obs
 from rl_games.algos_torch.players import rescale_actions
 
-from tensorboardX import SummaryWriter
 import joblib
 import gc
 from smpl_sim.smpllib.smpl_eval import compute_metrics_lite
@@ -98,7 +85,7 @@ class IMAmpAgent(amp_agent.AMPAgent):
     def restore(self, fn):
         super().restore(fn)
 
-        all_fails = glob.glob(osp.join(self.network_path, f"failed_*"))
+        all_fails = glob.glob(osp.join(self.network_path, "failed_*"))
         if len(all_fails) > 0:
             print(
                 "------------------------------------------------------ Restoring Termination History ------------------------------------------------------"

@@ -26,10 +26,8 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import glob
 import os
 import sys
-import pdb
 import os.path as osp
 
 sys.path.append(os.getcwd())
@@ -43,17 +41,13 @@ from phc.utils.config import (
 )
 from phc.utils.parse_task import parse_task
 
-from rl_games.algos_torch import players
 from rl_games.algos_torch import torch_ext
-from rl_games.common import env_configurations, experiment, vecenv
+from rl_games.common import env_configurations, vecenv
 from rl_games.common.algo_observer import AlgoObserver
 from rl_games.torch_runner import Runner
 
 from phc.utils.flags import flags
 
-import numpy as np
-import copy
-import torch
 import wandb
 
 from learning import im_amp
@@ -326,7 +320,7 @@ def main():
     if (not args.no_log) and (not args.test) and (not args.debug):
         wandb.init(
             project=project_name,
-            resume=not args.resume_str is None,
+            resume=args.resume_str is not None,
             id=args.resume_str,
             notes=cfg.get("notes", "no notes"),
         )

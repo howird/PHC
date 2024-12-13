@@ -1,50 +1,33 @@
 import glob
 import os
 import sys
-import pdb
-import os.path as osp
 
 sys.path.append(os.getcwd())
 
 from smpl_sim.utils import torch_utils
-from smpl_sim.poselib.skeleton.skeleton3d import (
-    SkeletonTree,
-    SkeletonMotion,
-    SkeletonState,
-)
 from scipy.spatial.transform import Rotation as sRot
 import numpy as np
 import torch
 from smpl_sim.smpllib.smpl_parser import (
     SMPL_Parser,
-    SMPLH_Parser,
-    SMPLX_Parser,
 )
 
 import joblib
-import torch
-import torch.nn.functional as F
-import math
-from smpl_sim.utils.pytorch3d_transforms import axis_angle_to_matrix
 from torch.autograd import Variable
 from tqdm import tqdm
 from smpl_sim.smpllib.smpl_joint_names import (
-    SMPL_MUJOCO_NAMES,
     SMPL_BONE_ORDER_NAMES,
-    SMPLH_BONE_ORDER_NAMES,
-    SMPLH_MUJOCO_NAMES,
 )
 from phc.utils.torch_humanoid_batch import Humanoid_Batch
-from smpl_sim.utils.smoothing_utils import gaussian_kernel_1d, gaussian_filter_1d_batch
-from easydict import EasyDict
+from smpl_sim.utils.smoothing_utils import gaussian_filter_1d_batch
 import hydra
-from omegaconf import DictConfig, OmegaConf
+from omegaconf import DictConfig
 
 
 def load_amass_data(data_path):
     entry_data = dict(np.load(open(data_path, "rb"), allow_pickle=True))
 
-    if not "mocap_framerate" in entry_data:
+    if "mocap_framerate" not in entry_data:
         return
     framerate = entry_data["mocap_framerate"]
 

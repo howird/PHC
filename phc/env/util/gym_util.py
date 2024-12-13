@@ -3,7 +3,6 @@ from isaacgym import gymapi
 import numpy as np
 import torch
 from isaacgym.torch_utils import *
-from isaacgym import gymtorch
 
 
 def setup_gym_viewer(config):

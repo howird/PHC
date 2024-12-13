@@ -10,7 +10,7 @@ The matplotlib plotter implementation for all the primitive tasks (in our case: 
 dots)
 """
 
-from typing import Any, Callable, Dict, List
+from typing import Any, Callable, Dict
 
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3

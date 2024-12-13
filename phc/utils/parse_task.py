@@ -39,9 +39,6 @@ from phc.env.tasks.humanoid_im_mcp_demo import HumanoidImMCPDemo
 
 from phc.env.tasks.humanoid_amp_heading import HumanoidAMPHeading
 
-from isaacgym import rlgpu
-
-import json
 import numpy as np
 
 

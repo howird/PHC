@@ -1,12 +1,6 @@
-from rl_games.algos_torch import torch_ext
-from rl_games.algos_torch import layers
 from learning.amp_network_builder import AMPBuilder
 import torch
-import torch.nn as nn
-import numpy as np
-import copy
 from phc.learning.pnn import PNN
-from rl_games.algos_torch import torch_ext
 
 DISC_LOGIT_INIT_SCALE = 1.0
 

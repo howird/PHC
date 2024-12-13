@@ -25,7 +25,7 @@ def record_func(action):
         writer = imageio.get_writer(
             curr_video_file_name, fps=fps, macro_block_size=None
         )
-    elif not writer is None:
+    elif writer is not None:
         writer.close()
         writer = None
 

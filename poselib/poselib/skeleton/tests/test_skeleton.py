@@ -18,7 +18,6 @@ from ...visualization.common import (
 
 from ...visualization.plt_plotter import Matplotlib3DPlotter
 from ...visualization.skeleton_plotter_tasks import (
-    Draw3DSkeletonMotion,
     Draw3DSkeletonState,
 )
 

@@ -3,10 +3,8 @@ import torch
 
 from rl_games.algos_torch import torch_ext
 from phc.utils.running_mean_std import RunningMeanStd
-from rl_games.common.player import BasePlayer
 import learning.common_player as common_player
 
-from rl_games.common.tr_helpers import unsqueeze_obs
 
 
 def rescale_actions(low, high, action):

@@ -1,14 +1,10 @@
-import glob
 import os
 import sys
-import pdb
-import os.path as osp
 
 sys.path.append(os.getcwd())
 
 import open3d as o3d
 import open3d.visualization.rendering as rendering
-import imageio
 from tqdm import tqdm
 import joblib
 import numpy as np
@@ -16,20 +12,15 @@ import torch
 
 from smpl_sim.smpllib.smpl_parser import (
     SMPL_Parser,
-    SMPLH_Parser,
-    SMPLX_Parser,
 )
-import random
 
 from smpl_sim.smpllib.smpl_mujoco import SMPL_BONE_ORDER_NAMES as joint_names
 from poselib.poselib.skeleton.skeleton3d import (
     SkeletonTree,
-    SkeletonMotion,
     SkeletonState,
 )
 from scipy.spatial.transform import Rotation as sRot
 import matplotlib.pyplot as plt
-from tqdm import tqdm
 import cv2
 
 paused, reset, recording, image_list, writer, control, curr_zoom = (

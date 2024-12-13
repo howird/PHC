@@ -1,5 +1,4 @@
 import cv2
-import numpy as np
 
 # Open camera 0
 cap = cv2.VideoCapture(0)

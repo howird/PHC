@@ -13,10 +13,8 @@
 # for Intelligent Systems. All rights reserved.
 #
 # Contact: ps-license@tuebingen.mpg.de
-import glob
 import os
 import sys
-import pdb
 import os.path as osp
 
 sys.path.append(os.getcwd())
@@ -26,7 +24,6 @@ import os
 import joblib
 import argparse
 import numpy as np
-import os.path as osp
 from tqdm import tqdm
 from pathlib import Path
 

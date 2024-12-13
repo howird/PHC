@@ -1,16 +1,10 @@
 import numpy as np
-import os
-import yaml
 from tqdm import tqdm
 import os.path as osp
 
-from phc.utils import torch_utils
 import joblib
 import torch
 from poselib.poselib.skeleton.skeleton3d import SkeletonMotion, SkeletonState
-import torch.multiprocessing as mp
-import copy
-import gc
 from smpl_sim.smpllib.smpl_parser import (
     SMPL_Parser,
     SMPLH_Parser,
@@ -21,7 +15,6 @@ import random
 from phc.utils.flags import flags
 from phc.utils.motion_lib_base import (
     MotionLibBase,
-    DeviceCache,
     compute_motion_dof_vels,
     FixHeightMode,
 )
@@ -221,7 +214,7 @@ class MotionLibSMPL(MotionLibBase):
                 )
             ##### ZL: randomize the heading ######
 
-            if not mesh_parsers is None:
+            if mesh_parsers is not None:
                 trans, trans_fix = MotionLibSMPL.fix_trans_height(
                     pose_aa,
                     trans,
@@ -267,7 +260,7 @@ class MotionLibSMPL(MotionLibBase):
             curr_motion.gender_beta = curr_gender_beta
             res[curr_id] = (curr_file, curr_motion)
 
-        if not queue is None:
+        if queue is not None:
             queue.put(res)
         else:
             return res

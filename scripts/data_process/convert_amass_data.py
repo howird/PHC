@@ -1,8 +1,6 @@
 import glob
 import os
 import sys
-import pdb
-import os.path as osp
 
 sys.path.append(os.getcwd())
 
@@ -12,10 +10,8 @@ import numpy as np
 import joblib
 from tqdm import tqdm
 import argparse
-import cv2
 from poselib.poselib.skeleton.skeleton3d import (
     SkeletonTree,
-    SkeletonMotion,
     SkeletonState,
 )
 from smpl_sim.smpllib.smpl_joint_names import SMPL_MUJOCO_NAMES, SMPL_BONE_ORDER_NAMES
@@ -84,7 +80,7 @@ if __name__ == "__main__":
         splits = data_path.split("/")[7:]
         key_name_dump = "0-" + "_".join(splits).replace(".npz", "")
 
-        if not splits[0] in process_set:
+        if splits[0] not in process_set:
             print(f"Skipping {data_path}: Not in process set {process_split}.")
             continue
 
@@ -105,7 +101,7 @@ if __name__ == "__main__":
 
         entry_data = dict(np.load(open(data_path, "rb"), allow_pickle=True))
 
-        if not "mocap_framerate" in entry_data:
+        if "mocap_framerate" not in entry_data:
             print(f"Skipping {data_path}: No mocap_framerate.")
             continue
         framerate = entry_data["mocap_framerate"]

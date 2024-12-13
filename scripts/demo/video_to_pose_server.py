@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import os
 import cv2
-import joblib
 import numpy as np
 import time
 
@@ -9,20 +8,14 @@ import tensorflow as tf
 import tensorflow_hub as hub
 
 
-import asyncio
 from aiohttp import web
-import cv2
 import aiohttp
-import numpy as np
 import threading
 from scipy.spatial.transform import Rotation as sRot
 
-import time
 import torch
 from collections import deque
 from datetime import datetime
-from torchvision import transforms as T
-import time
 from ultralytics import YOLO
 import scipy.interpolate as interpolate
 
@@ -119,7 +112,6 @@ def start_pose_estimate():
         fps
     offset = np.zeros((5, 1))
 
-    from scipy.spatial.transform import Rotation as sRot
 
     global_transform = sRot.from_quat([0.5, 0.5, 0.5, 0.5]).inv().as_matrix()
     transform = sRot.from_euler(
@@ -143,7 +135,7 @@ def start_pose_estimate():
 
     with torch.no_grad():
         while True:
-            if not frame is None:
+            if frame is not None:
                 # pred = model.detect_poses(frame, skeleton=skeleton, default_fov_degrees=55, detector_threshold=0.5, num_aug=5)
                 pred = model.estimate_poses(
                     frame,
@@ -315,7 +307,7 @@ def frames_from_webcam():
                     5,
                 )
 
-        if not j2d is None:
+        if j2d is not None:
             for pt in j2d.reshape(-1, 2):
                 x, y = pt
                 frame_orig = cv2.circle(
@@ -409,7 +401,7 @@ def write_frames_to_video(
             curr_frame = curr_frame * 256
         if transform_dtype:
             curr_frame = curr_frame.astype(np.uint8)
-        if not add_text is None:
+        if add_text is not None:
             cv2.putText(curr_frame, add_text, (0, 20), 3, 1, text_color)
 
         out.write(curr_frame)

@@ -1,7 +1,5 @@
-import glob
 import os
 import sys
-import pdb
 import os.path as osp
 
 sys.path.append(os.getcwd())
@@ -9,8 +7,6 @@ sys.path.append(os.getcwd())
 import numpy as np
 import torch
 from phc.utils.flags import flags
-from rl_games.algos_torch import torch_ext
-from rl_games.common.player import BasePlayer
 
 import learning.amp_players as amp_players
 from tqdm import tqdm
@@ -19,7 +15,6 @@ import time
 from smpl_sim.smpllib.smpl_eval import compute_metrics_lite
 from rl_games.common.tr_helpers import unsqueeze_obs
 from datetime import datetime
-import copy
 
 COLLECT_Z = False
 

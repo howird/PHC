@@ -1,14 +1,11 @@
-import time
 import torch
 import phc.env.tasks.humanoid_im as humanoid_im
 
 from isaacgym.torch_utils import *
 from phc.utils.flags import flags
 from rl_games.algos_torch import torch_ext
-import torch.nn as nn
-from phc.learning.pnn import PNN
 from collections import deque
-from phc.learning.network_loader import load_mcp_mlp, load_pnn
+from phc.learning.network_loader import load_pnn
 from phc.learning.mlp import MLP
 
 

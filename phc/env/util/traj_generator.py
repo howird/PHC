@@ -28,7 +28,6 @@
 
 import numpy as np
 import torch
-import joblib
 import random
 from phc.utils.flags import flags
 # from phc.env.tasks.base_task import PORT, SERVER
@@ -152,7 +151,6 @@ class TrajGenerator:
         return
 
     def input_new_trajs(self, env_ids):
-        import json
         import requests
         from scipy.interpolate import interp1d
 
@@ -224,7 +222,7 @@ class TrajGenerator:
         pos = (1.0 - lerp) * pos0 + lerp * pos1
 
         new_obs, func = query_value_gradient(env_ids, pos)
-        if not new_obs is None:
+        if new_obs is not None:
             # ZL: computes grad
             with torch.enable_grad():
                 new_obs.requires_grad_(True)

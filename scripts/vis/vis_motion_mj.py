@@ -1,9 +1,6 @@
 import os
 import sys
 import time
-import argparse
-import pdb
-import os.path as osp
 
 sys.path.append(os.getcwd())
 
@@ -12,9 +9,6 @@ from poselib.poselib.skeleton.skeleton3d import SkeletonTree
 import torch
 
 import numpy as np
-import math
-from copy import deepcopy
-from collections import defaultdict
 import mujoco
 import mujoco.viewer
 from scipy.spatial.transform import Rotation as sRot
@@ -126,7 +120,7 @@ if __name__ == "__main__":
         gender=gender_beta[0:1],
         objs_info=None,
     )
-    test_good = f"/tmp/smpl/test_good.xml"
+    test_good = "/tmp/smpl/test_good.xml"
     smpl_robot.write_xml(test_good)
     smpl_robot.write_xml("test.xml")
     sk_tree = SkeletonTree.from_mjcf(test_good)

@@ -28,14 +28,11 @@
 
 import torch
 
-from isaacgym import gymapi
 from isaacgym import gymtorch
 
-from env.util import gym_util
 from phc.env.tasks.humanoid_amp import HumanoidAMP
 from isaacgym.torch_utils import *
 
-from phc.utils import torch_utils
 
 
 class HumanoidAMPGetup(HumanoidAMP):

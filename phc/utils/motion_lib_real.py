@@ -1,6 +1,4 @@
 import numpy as np
-import os
-import yaml
 from tqdm import tqdm
 import os.path as osp
 
@@ -10,20 +8,13 @@ import torch
 import torch.multiprocessing as mp
 
 # import multiprocessing as mp
-import copy
 import gc
-from smpl_sim.smpllib.smpl_parser import (
-    SMPL_Parser,
-    SMPLH_Parser,
-    SMPLX_Parser,
-)
 from scipy.spatial.transform import Rotation as sRot
 import random
 from phc.utils.flags import flags
 from phc.utils.motion_lib_base import (
     MotionLibBase,
     DeviceCache,
-    compute_motion_dof_vels,
     FixHeightMode,
 )
 from phc.utils.torch_humanoid_batch import Humanoid_Batch
@@ -542,7 +533,7 @@ class MotionLibReal(MotionLibBase):
             #     trans = torch.matmul(trans, torch.from_numpy(random_heading_rot.as_matrix().T))
             ##### ZL: randomize the heading ######
 
-            if not target_heading is None:
+            if target_heading is not None:
                 start_root_rot = sRot.from_rotvec(pose_aa[0, 0])
                 heading_inv_rot = sRot.from_quat(
                     torch_utils.calc_heading_quat_inv(
@@ -574,7 +565,7 @@ class MotionLibReal(MotionLibBase):
 
             res[curr_id] = (curr_file, curr_motion)
 
-        if not queue is None:
+        if queue is not None:
             queue.put(res)
         else:
             return res

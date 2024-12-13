@@ -10,11 +10,8 @@ license agreement from NVIDIA CORPORATION is strictly prohibited.
 Visualize motion library
 """
 
-import glob
 import os
 import sys
-import pdb
-import os.path as osp
 
 sys.path.append(os.getcwd())
 
@@ -90,7 +87,7 @@ smpl_robot.load_from_skeleton(
     gender=gender_beta[0:1],
     objs_info=None,
 )
-test_good = f"/tmp/smpl/test_good.xml"
+test_good = "/tmp/smpl/test_good.xml"
 smpl_robot.write_xml(test_good)
 sk_tree = SkeletonTree.from_mjcf(test_good)
 

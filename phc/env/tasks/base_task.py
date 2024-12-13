@@ -26,11 +26,8 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import enum
-import glob
 import os
 import sys
-import pdb
 import os.path as osp
 
 sys.path.append(os.getcwd())
@@ -57,11 +54,12 @@ import imageio
 from datetime import datetime
 from phc.utils.flags import flags
 from collections import defaultdict
-import aiohttp, cv2, asyncio
+import aiohttp
+import cv2
+import asyncio
 import json
 from collections import deque
 import threading
-from tqdm import tqdm
 
 
 # Base class for RL tasks
@@ -372,7 +370,7 @@ class BaseTask:
             while True:
                 if (
                     "color_image" in self.__dict__
-                    and not self.color_image is None
+                    and self.color_image is not None
                     and len(self.color_image.shape) == 3
                 ):
                     image = cv2.resize(
@@ -495,7 +493,7 @@ class BaseTask:
                     )
 
                 else:
-                    print(f"============ Writing video ============")
+                    print("============ Writing video ============")
                 self.recording_state_change = False
 
             if self.recording:
@@ -520,7 +518,7 @@ class BaseTask:
                         ]
 
                 if not flags.server_mode:
-                    if not "writer" in self.__dict__:
+                    if "writer" not in self.__dict__:
                         curr_date_time = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
                         self.curr_video_file_name = self._video_path % curr_date_time
                         self.curr_states_file_name = self._states_path % curr_date_time

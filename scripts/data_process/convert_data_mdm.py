@@ -1,29 +1,18 @@
-from ast import Try
 import torch
 import joblib
-import matplotlib.pyplot as plt
 import numpy as np
-from scipy import ndimage
 from scipy.spatial.transform import Rotation as sRot
-import glob
 import os
 import sys
-import pdb
-import os.path as osp
 
 sys.path.append(os.getcwd())
 
-from smpl_sim.utils.config_utils.copycat_config import Config as CC_Config
-from smpl_sim.khrylib.utils import get_body_qposaddr
 from smpl_sim.smpllib.smpl_mujoco import SMPL_BONE_ORDER_NAMES as joint_names
-from smpl_sim.smpllib.smpl_robot import Robot
 from smpl_sim.smpllib.smpl_local_robot import SMPL_Robot as LocalRobot
 import scipy.ndimage.filters as filters
-from typing import List, Optional
 from tqdm import tqdm
 from poselib.poselib.skeleton.skeleton3d import (
     SkeletonTree,
-    SkeletonMotion,
     SkeletonState,
 )
 

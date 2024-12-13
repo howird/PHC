@@ -25,23 +25,15 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-from ast import Try
-import glob
 import os
 import sys
-import pdb
-import os.path as osp
 
 sys.path.append(os.getcwd())
 from enum import Enum
-from matplotlib.pyplot import flag
 import numpy as np
 import torch
-from torch import Tensor
-from typing import Dict, Optional
 
 from isaacgym import gymapi
-from isaacgym import gymtorch
 
 from phc.env.tasks.humanoid import (
     Humanoid,
@@ -49,7 +41,6 @@ from phc.env.tasks.humanoid import (
     remove_base_rot,
     dof_to_obs_smpl,
 )
-from phc.env.util import gym_util
 from phc.utils.motion_lib_real import MotionLibReal
 from phc.utils.motion_lib_smpl import MotionLibSMPL
 from phc.utils.motion_lib_base import FixHeightMode
@@ -60,10 +51,8 @@ from phc.utils import torch_utils
 
 from smpl_sim.smpllib.smpl_parser import (
     SMPL_Parser,
-    SMPLH_Parser,
     SMPLX_Parser,
 )
-import gc
 from phc.utils.flags import flags
 from collections import OrderedDict
 
@@ -500,7 +489,7 @@ class HumanoidAMP(Humanoid):
             if not self._amp_root_height_obs:
                 self._num_amp_obs_per_step -= 1
         else:
-            print("Unsupported character config file: {s}".format(asset_file))
+            print("Unsupported character config file: {s}".format())
             assert False
 
         if self._enable_hist_obs:
@@ -716,7 +705,7 @@ class HumanoidAMP(Humanoid):
         ## Cache the motion + offset
         if (
             offset is None
-            or not "motion_ids" in self.ref_motion_cache
+            or "motion_ids" not in self.ref_motion_cache
             or self.ref_motion_cache["offset"] is None
             or len(self.ref_motion_cache["motion_ids"]) != len(motion_ids)
             or len(self.ref_motion_cache["offset"]) != len(offset)
@@ -732,7 +721,7 @@ class HumanoidAMP(Humanoid):
                 motion_times.clone()
             )  # need to clone; otherwise will be overriden
             self.ref_motion_cache["offset"] = (
-                offset.clone() if not offset is None else None
+                offset.clone() if offset is not None else None
             )
         else:
             return self.ref_motion_cache
@@ -1043,7 +1032,7 @@ class HumanoidAMP(Humanoid):
         self._dof_pos[env_ids] = dof_pos
         self._dof_vel[env_ids] = dof_vel
 
-        if (not rigid_body_pos is None) and (not rigid_body_rot is None):
+        if (rigid_body_pos is not None) and (rigid_body_rot is not None):
             self._rigid_body_pos[env_ids] = rigid_body_pos
             self._rigid_body_rot[env_ids] = rigid_body_rot
             self._rigid_body_vel[env_ids] = rigid_body_vel
@@ -1506,9 +1495,6 @@ class HumanoidAMP(Humanoid):
     def _hack_output_motion(self):
         fps = 1.0 / self.dt
         from poselib.poselib.skeleton.skeleton3d import SkeletonMotion, SkeletonState
-        from poselib.poselib.visualization.common import (
-            plot_skeleton_motion_interactive,
-        )
 
         if not hasattr(self, "_output_motion_root_pos"):
             self._output_motion_root_pos = []

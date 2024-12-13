@@ -1,9 +1,6 @@
 import os
 import sys
 import time
-import argparse
-import pdb
-import os.path as osp
 
 sys.path.append(os.getcwd())
 
@@ -12,15 +9,11 @@ from smpl_sim.poselib.skeleton.skeleton3d import SkeletonTree
 import torch
 
 import numpy as np
-import math
-from copy import deepcopy
-from collections import defaultdict
 import mujoco
 import mujoco.viewer
-from scipy.spatial.transform import Rotation as sRot
 import joblib
 import hydra
-from omegaconf import DictConfig, OmegaConf
+from omegaconf import DictConfig
 
 
 def add_visual_capsule(scene, point1, point2, radius, rgba):

@@ -1,11 +1,9 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
 from phc.utils import torch_utils
 
 from easydict import EasyDict as edict
-from phc.learning.vq_quantizer import EMAVectorQuantizer, Quantizer
+from phc.learning.vq_quantizer import Quantizer
 from phc.learning.pnn import PNN
 
 

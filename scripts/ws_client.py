@@ -2,10 +2,7 @@ import asyncio
 import os
 
 import aiohttp
-import json
-import numpy as np
 
-import subprocess
 
 HOST = os.getenv("HOST", "172.29.229.220")
 # HOST = os.getenv('HOST', '0.0.0.0')

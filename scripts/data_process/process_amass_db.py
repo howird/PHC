@@ -1,14 +1,9 @@
-import glob
 import os
 import sys
-import pdb
-import os.path as osp
 
 sys.path.append(os.getcwd())
 
 import numpy as np
-import glob
-import pickle as pk
 import joblib
 import torch
 import argparse
@@ -16,10 +11,6 @@ import argparse
 from tqdm import tqdm
 from smpl_sim.utils.transform_utils import (
     convert_aa_to_orth6d,
-    convert_orth_6d_to_aa,
-    vertizalize_smpl_root,
-    rotation_matrix_to_angle_axis,
-    rot6d_to_rotmat,
 )
 from scipy.spatial.transform import Rotation as sRot
 from smpl_sim.smpllib.smpl_parser import SMPL_Parser

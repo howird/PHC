@@ -1,13 +1,8 @@
-import copy
-from datetime import datetime
 from gym import spaces
 import numpy as np
 import os
 import time
-import yaml
-import glob
 import sys
-import pdb
 import os.path as osp
 
 sys.path.append(os.getcwd())
@@ -17,17 +12,13 @@ from rl_games.algos_torch import torch_ext
 from rl_games.algos_torch import central_value
 from phc.utils.running_mean_std import RunningMeanStd
 from rl_games.common import a2c_common
-from rl_games.common import datasets
-from rl_games.common import schedulers
-from rl_games.common import vecenv
 
 import torch
+import torch.nn as nn
 from torch import optim
-from gym import spaces
 
 import learning.amp_datasets as amp_datasets
 
-from tensorboardX import SummaryWriter
 import wandb
 
 
@@ -718,7 +709,7 @@ class CommonAgent(a2c_continuous.A2CAgent):
         for k, v in train_info.items():
             self.writer.add_scalar(k, v, self.epoch_num)
 
-        if not wandb.run is None:
+        if wandb.run is not None:
             wandb.log(train_info, step=self.epoch_num)
 
         return
@@ -1249,7 +1240,7 @@ class CommonDiscreteAgent(a2c_discrete.DiscreteA2CAgent):
         for k, v in train_info.items():
             self.writer.add_scalar(k, v, self.epoch_num)
 
-        if not wandb.run is None:
+        if wandb.run is not None:
             wandb.log(train_info, step=self.epoch_num)
 
         return

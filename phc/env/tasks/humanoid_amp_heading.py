@@ -1,5 +1,4 @@
 import torch
-import numpy as np
 from phc.env.tasks.humanoid_amp import HumanoidAMP
 from phc.utils import torch_utils
 from isaacgym.torch_utils import *

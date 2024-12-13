@@ -1,26 +1,18 @@
-import os
 import torch
 import numpy as np
-from phc.utils.torch_utils import quat_to_tan_norm
 import phc.env.tasks.humanoid_im_mcp as humanoid_im_mcp
 import phc.env.tasks.humanoid_im as humanoid_im
-from phc.env.tasks.humanoid_amp import HumanoidAMP, remove_base_rot
-from phc.utils.motion_lib_smpl import MotionLibSMPL
 
-from phc.utils import torch_utils
 
-from isaacgym import gymapi
 from isaacgym import gymtorch
 from isaacgym.torch_utils import *
 from phc.utils.flags import flags
-import joblib
-import gc
-from collections import defaultdict
 from scipy.spatial.transform import Rotation as sRot
 import phc.utils.pytorch3d_transforms as ptr
 from poselib.poselib.skeleton.skeleton3d import SkeletonMotion, SkeletonState
 
-import aiohttp, cv2, asyncio, json
+import aiohttp
+import json
 import requests
 from collections import deque
 import scipy.ndimage.filters as filters

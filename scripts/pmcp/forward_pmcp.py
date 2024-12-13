@@ -1,8 +1,6 @@
 import glob
 import os
 import sys
-import pdb
-import os.path as osp
 
 sys.path.append(os.getcwd())
 from rl_games.algos_torch import torch_ext
@@ -79,7 +77,7 @@ if __name__ == "__main__":
         if key in amass_train_data_take6
     }
 
-    os.makedirs(f"data/amass/pkls/auto_pmcp", exist_ok=True)
+    os.makedirs("data/amass/pkls/auto_pmcp", exist_ok=True)
     print(
         f"dumping {len(failed_dump)} samples to data/amass/pkls/auto_pmcp/{exp_name}_{epoch}.pkl"
     )

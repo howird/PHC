@@ -1,8 +1,6 @@
 import glob
 import os
 import sys
-import pdb
-import os.path as osp
 
 sys.path.append(os.getcwd())
 
@@ -15,19 +13,11 @@ import joblib
 import random
 import os
 import wandb
-import argparse
 from datetime import datetime
 from phc.learning.mlp import MLP
-import h5py
 from tqdm import tqdm
-import glob
 import os
-from datetime import datetime
 from collections import defaultdict
-from tqdm import tqdm
-import joblib
-import numpy as np
-import random
 
 
 wandb.login()
@@ -223,7 +213,7 @@ def train_model(
             loss.backward()
             optimizer.step()
 
-        if not wandb.run is None:
+        if wandb.run is not None:
             wandb.log({"loss": loss.item()})
 
         pbar.set_description(f"Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}")
@@ -293,7 +283,7 @@ if __name__ == "__main__":
     dataset_path = "/data/kangnil/PHC/output/HumanoidIm/phc_comp_3/phc_act/amass_isaac_im_train_take6_upright_slim/0_and_0.05_noise/six_0.05/combined_pkl/2024-09-08-04:30:47.pkl"
     # dataset_path = "/data/kangnil/PHC/output/HumanoidIm/phc_comp_3/phc_act/amass_isaac_im_train_take6_upright_slim/noise_True_0.1_2024-09-05-05:59:22.pkl"
     metadata_path = "/data/kangnil/PHC/output/HumanoidIm/phc_comp_3/phc_act/phc_act_amass_isaac_im_train_take6_upright_slim_metadata.pkl"
-    output_path = f"/data/kangnil/PHC/output/HumanoidIm/phc_comp_3/phc_act/amass_isaac_im_train_take6_upright_slim/models/"
+    output_path = "/data/kangnil/PHC/output/HumanoidIm/phc_comp_3/phc_act/amass_isaac_im_train_take6_upright_slim/models/"
     ckpt_path = "01600.pth"
     os.makedirs(output_path, exist_ok=True)
     sample_pkl_or_not = True

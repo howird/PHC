@@ -1,9 +1,6 @@
-from rl_games.algos_torch import torch_ext
-from rl_games.algos_torch import layers
 import phc.learning.network_builder as network_builder
 import torch
 import torch.nn as nn
-import numpy as np
 
 DISC_LOGIT_INIT_SCALE = 1.0
 

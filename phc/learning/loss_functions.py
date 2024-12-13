@@ -1,4 +1,3 @@
-import torch
 
 
 def kl_multi(qm, qv, pm, pv):

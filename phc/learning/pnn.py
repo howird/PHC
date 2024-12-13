@@ -3,7 +3,6 @@ import torch.nn as nn
 from phc.learning.network_builder import NetworkBuilder
 from collections import defaultdict
 from rl_games.algos_torch import torch_ext
-from tqdm import tqdm
 
 
 class PNN(NetworkBuilder.BaseNetwork):

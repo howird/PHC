@@ -1,7 +1,5 @@
-import glob
 import os
 import sys
-import pdb
 import os.path as osp
 
 sys.path.append(os.getcwd())
@@ -18,15 +16,13 @@ import xml.etree.ElementTree as ETree
 from easydict import EasyDict
 import scipy.ndimage.filters as filters
 import smpl_sim.poselib.core.rotation3d as pRot
-from lxml.etree import XMLParser, parse, ElementTree, Element, SubElement
-from lxml import etree
+from lxml.etree import XMLParser, parse
 from io import BytesIO
 import copy
 from collections import OrderedDict
 import hydra
 from omegaconf import DictConfig
 from tqdm import tqdm
-from stl import mesh
 import logging
 import open3d as o3d
 
@@ -72,7 +68,7 @@ class Humanoid_Batch:
         )
 
         for m in motors:
-            if not m in joints:
+            if m not in joints:
                 print(m)
 
         if (
@@ -84,7 +80,7 @@ class Humanoid_Batch:
                 self.dof_axis.append([int(i) for i in j.attrib["axis"].split(" ")])
             self.has_freejoint = True
         elif (
-            not "type" in tree.getroot().find("worldbody").findall(".//joint")[0].attrib
+            "type" not in tree.getroot().find("worldbody").findall(".//joint")[0].attrib
         ):
             for j in tree.getroot().find("worldbody").findall(".//joint"):
                 self.dof_axis.append([int(i) for i in j.attrib["axis"].split(" ")])
@@ -169,7 +165,7 @@ class Humanoid_Batch:
                 all_joints = all_joints[6:]
 
             for joint in all_joints:
-                if not joint.attrib.get("range") is None:
+                if joint.attrib.get("range") is not None:
                     joints_range.append(
                         np.fromstring(joint.attrib.get("range"), dtype=float, sep=" ")
                     )

@@ -51,7 +51,7 @@ class AMPDataset(datasets.PPODataset):
                         .view(self.num_envs, self.horizon_length, -1)
                         .squeeze()
                     )  # Actions are already swapped to the correct format.
-            if not self.values_dict["rnn_states"] is None:
+            if self.values_dict["rnn_states"] is not None:
                 self.values_dict["rnn_states"] = [
                     s.reshape(self.num_envs, self.horizon_length, -1)
                     for s in self.values_dict["rnn_states"]
@@ -89,7 +89,7 @@ class AMPDataset(datasets.PPODataset):
             :, None
         ]  # ZL Hack: following compute assumes that the old_values is [batch, 1], so has to change this back. Otherwise, the loss will be wrong.
 
-        if not self.values_dict["rnn_states"] is None:
+        if self.values_dict["rnn_states"] is not None:
             input_dict["rnn_states"] = [
                 s[sample_idx, :].view(step_size * self.horizon_length, -1)
                 for s in self.values_dict["rnn_states"]

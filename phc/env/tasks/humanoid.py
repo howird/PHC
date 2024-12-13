@@ -47,9 +47,6 @@ from phc.env.tasks.base_task import BaseTask
 from tqdm import tqdm
 from poselib.poselib.skeleton.skeleton3d import SkeletonTree
 from collections import defaultdict
-from poselib.poselib.skeleton.skeleton3d import SkeletonMotion, SkeletonState
-from scipy.spatial.transform import Rotation as sRot
-import gc
 import torch.multiprocessing as mp
 from phc.utils.draw_utils import agt_color, get_color_gradient
 
@@ -654,7 +651,7 @@ class Humanoid(BaseTask):
         ]
 
         for idx, name in enumerate(self._dof_names):
-            if not name in remove_names:
+            if name not in remove_names:
                 disc_idxes.append(np.arange(idx * 3, (idx + 1) * 3))
 
         self.dof_subset = (
@@ -1028,7 +1025,7 @@ class Humanoid(BaseTask):
                 self._num_self_obs -= 1
 
         else:
-            print("Unsupported character config file: {s}".format(asset_file))
+            print("Unsupported character config file: {s}".format())
             assert False
 
         return
@@ -1082,7 +1079,7 @@ class Humanoid(BaseTask):
 
             asset_id = uuid4()
 
-            if not smpl_robot is None:
+            if smpl_robot is not None:
                 asset_id = uuid4()
                 asset_file_real = f"/tmp/smpl/smpl_humanoid_{asset_id}.xml"
                 smpl_robot.load_from_skeleton(
@@ -1098,7 +1095,7 @@ class Humanoid(BaseTask):
 
             res[idx] = (gender_beta, asset_file_real)
 
-        if not queue is None:
+        if queue is not None:
             queue.put(res)
         else:
             return res
@@ -1219,7 +1216,7 @@ class Humanoid(BaseTask):
                     self.humanoid_assets.append(humanoid_asset)
                     self.skeleton_trees.append(sk_tree)
 
-                if not robot is None:
+                if robot is not None:
                     robot.remove_geoms()  # Clean up the geoms
 
                 self.humanoid_shapes = torch.vstack(self.humanoid_shapes).to(

@@ -1,6 +1,5 @@
 # This is the overall forward pass of the model.
 
-import torch.nn as nn
 from rl_games.algos_torch.models import ModelA2CContinuousLogStd
 import torch
 

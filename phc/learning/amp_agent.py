@@ -1,27 +1,18 @@
 from phc.utils.running_mean_std import RunningMeanStd
 from rl_games.algos_torch import torch_ext
 from rl_games.common import a2c_common
-from rl_games.common import schedulers
-from rl_games.common import vecenv
 
 from isaacgym.torch_utils import *
 
 import time
-from datetime import datetime
 import numpy as np
-from torch import optim
 import torch
 from torch import nn
-from phc.env.tasks.humanoid_amp_task import HumanoidAMPTask
 
 import learning.replay_buffer as replay_buffer
 import learning.common_agent as common_agent
 
-from tensorboardX import SummaryWriter
 import copy
-from phc.utils.torch_utils import project_to_norm
-import learning.amp_datasets as amp_datasets
-from phc.learning.loss_functions import kl_multi
 from smpl_sim.utils.math_utils import LinearAnneal
 
 
@@ -70,9 +61,9 @@ class AMPAgent(common_agent.CommonAgent):
             
             # Create linear annealing schedule
             self._task_reward_w_scheduler = LinearAnneal(
-                start_val=self._task_reward_w_initial, 
-                end_val=self._task_reward_w_final, 
-                max_epochs=self._task_reward_anneal_epochs
+                start_value=self._task_reward_w_initial, 
+                end_value=self._task_reward_w_final, 
+                total_steps=self._task_reward_anneal_epochs
             )
             
             # Tracking for logging
@@ -708,7 +699,7 @@ class AMPAgent(common_agent.CommonAgent):
             disc_agent_replay_logit = res_dict["disc_agent_replay_logit"]
             disc_demo_logit = res_dict["disc_demo_logit"]
 
-            if not rnn_masks is None:
+            if rnn_masks is not None:
                 rnn_mask_bool = rnn_masks.squeeze().bool()
                 (
                     old_action_log_probs_batch,
@@ -1004,7 +995,7 @@ class AMPAgent(common_agent.CommonAgent):
         
         if self._use_dynamic_reward_weights:
             # Dynamically compute task and discriminator reward weights
-            self._current_task_reward_w = self._task_reward_w_scheduler.get_value(self.epoch_num)
+            self._current_task_reward_w = self._task_reward_w_scheduler.step()
             self._current_disc_reward_w = 1.0 - self._current_task_reward_w
         
         # COMBINE REWARDS with weights

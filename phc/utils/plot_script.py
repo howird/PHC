@@ -2,8 +2,7 @@ import math
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib.animation import FuncAnimation, FFMpegFileWriter
+from matplotlib.animation import FuncAnimation
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 import mpl_toolkits.mplot3d.axes3d as p3
 
@@ -64,7 +63,7 @@ def plot_3d_motion(
 
     # (seq_len, joints_num, 3)
     data = joints.copy().reshape(len(joints), -1, 3)
-    if not gt_joints is None:
+    if gt_joints is not None:
         data_gt = gt_joints.copy().reshape(len(gt_joints), -1, 3)
 
     fig = plt.figure(figsize=figsize)
@@ -98,7 +97,7 @@ def plot_3d_motion(
     data[..., 0] -= data[:, 0:1, 0]
     data[..., 2] -= data[:, 0:1, 2]
 
-    if not gt_joints is None:
+    if gt_joints is not None:
         data_gt[:, :, 1] -= height_offset
         data_gt[..., 0] -= data_gt[:, 0:1, 0]
         data_gt[..., 2] -= data_gt[:, 0:1, 2]
@@ -142,7 +141,7 @@ def plot_3d_motion(
                 s=50,
             )
 
-            if not gt_joints is None:
+            if gt_joints is not None:
                 ax.plot3D(
                     data_gt[index, chain, 0],
                     data_gt[index, chain, 1],
