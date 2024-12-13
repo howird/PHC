@@ -87,8 +87,11 @@ params:
     disc_weight_decay: 0.0001
     normalize_amp_input: True
 
-    task_reward_w: 0.5
-    disc_reward_w: 0.5
+    task_reward_w: 0.3
+    disc_reward_w: 0.7
+    use_dynamic_reward_weights: True
+    task_reward_w_final: 0.9
+    task_reward_anneal_epochs: 10000
 
     player: 
       games_num: 50000000
