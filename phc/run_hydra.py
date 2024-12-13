@@ -26,10 +26,8 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import glob
 import os
 import sys
-import pdb
 import os.path as osp
 
 os.environ["OMP_NUM_THREADS"] = "1"
@@ -53,27 +51,24 @@ from isaacgym import gymapi
 from isaacgym import gymutil
 
 
-from rl_games.algos_torch import players
 from rl_games.algos_torch import torch_ext
-from rl_games.common import env_configurations, experiment, vecenv
+from rl_games.common import env_configurations, vecenv
 from rl_games.common.algo_observer import AlgoObserver
 from rl_games.torch_runner import Runner
 
 from phc.utils.flags import flags
 
-import numpy as np
-import copy
-import torch
 import wandb
 
-from learning import im_amp
-from learning import im_amp_players
-from learning import amp_agent
 from learning import amp_players
 from learning import amp_models
 from learning import amp_network_builder
-from learning import amp_network_mcp_builder
-from learning import amp_network_pnn_builder
+
+from learning import common_agent
+from learning import common_player
+from learning import non_amp_network_builder
+
+from learning import amp_agent
 
 from env.tasks import humanoid_amp_task
 import hydra
@@ -286,23 +281,37 @@ env_configurations.register(
 
 def build_alg_runner(algo_observer):
     runner = Runner(algo_observer)
-    runner.player_factory.register_builder(
-        "amp_discrete", lambda **kwargs: amp_players.AMPPlayerDiscrete(**kwargs)
-    )
 
+    # AGENT/ALGO FACTORIES
     runner.algo_factory.register_builder(
         "amp", lambda **kwargs: amp_agent.AMPAgent(**kwargs)
     )
+    runner.algo_factory.register_builder(
+        "nonamp", lambda **kwargs: common_agent.CommonAgent(**kwargs)
+    )
+
+    # PLAYER FACTORIES
     runner.player_factory.register_builder(
         "amp", lambda **kwargs: amp_players.AMPPlayerContinuous(**kwargs)
     )
+    runner.player_factory.register_builder(
+        "nonamp", lambda **kwargs: common_player.CommonPlayer(**kwargs)
+    )
 
+    # MODEL FACTORIES
     runner.model_builder.model_factory.register_builder(
         "amp", lambda network, **kwargs: amp_models.ModelAMPContinuous(network)
     )
+    # based on 'continuous_a2c_logstd'
+
+    # NETWORK FACTORIES
     runner.model_builder.network_factory.register_builder(
         "amp", lambda **kwargs: amp_network_builder.AMPBuilder()
     )
+    runner.model_builder.network_factory.register_builder(
+        "nonamp", lambda **kwargs: non_amp_network_builder.NonAMPBuilder()
+    )
+
     # runner.model_builder.network_factory.register_builder(
     #     "amp_mcp", lambda **kwargs: amp_network_mcp_builder.AMPMCPBuilder()
     # )
@@ -387,7 +396,7 @@ def main(cfg_hydra: DictConfig) -> None:
     if (not cfg.no_log) and (not cfg.test) and (not cfg.debug):
         wandb.init(
             project=project_name,
-            resume=not cfg.resume_str is None,
+            resume=cfg.resume_str is not None,
             id=cfg.resume_str,
             notes=cfg.get("notes", "no notes"),
         )
