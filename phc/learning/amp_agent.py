@@ -70,9 +70,9 @@ class AMPAgent(common_agent.CommonAgent):
             
             # Create linear annealing schedule
             self._task_reward_w_scheduler = LinearAnneal(
-                start_val=self._task_reward_w_initial, 
-                end_val=self._task_reward_w_final, 
-                max_epochs=self._task_reward_anneal_epochs
+                start_value=self._task_reward_w_initial, 
+                end_value=self._task_reward_w_final, 
+                total_steps=self._task_reward_anneal_epochs
             )
             
             # Tracking for logging
@@ -1004,7 +1004,7 @@ class AMPAgent(common_agent.CommonAgent):
         
         if self._use_dynamic_reward_weights:
             # Dynamically compute task and discriminator reward weights
-            self._current_task_reward_w = self._task_reward_w_scheduler.get_value(self.epoch_num)
+            self._current_task_reward_w = self._task_reward_w_scheduler.step()
             self._current_disc_reward_w = 1.0 - self._current_task_reward_w
         
         # COMBINE REWARDS with weights
