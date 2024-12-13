@@ -66,6 +66,7 @@ params:
     mini_epochs: 5
     critic_coef: 5
     clip_value: False
+    bounds_loss_coef: 10
     
     player: 
       games_num: 50000000

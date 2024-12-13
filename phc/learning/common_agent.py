@@ -579,7 +579,7 @@ class CommonAgent(a2c_continuous.A2CAgent):
             mu_loss_low = torch.clamp_max(mu + soft_bound, 0.0) ** 2
             b_loss = (mu_loss_low + mu_loss_high).sum(axis=-1)
         else:
-            b_loss = 0
+            b_loss = torch.Tensor(0)
         return b_loss
 
     def _get_mean_rewards(self):
