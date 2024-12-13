@@ -27,7 +27,6 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from phc.env.tasks.humanoid import Humanoid
-from phc.env.tasks.humanoid_amp_heading import HumanoidAMPHeading
 from phc.env.tasks.humanoid_amp import HumanoidAMP
 from phc.env.tasks.humanoid_amp_getup import HumanoidAMPGetup
 from phc.env.tasks.humanoid_im import HumanoidIm
@@ -37,6 +36,8 @@ from phc.env.tasks.humanoid_im_mcp_getup import HumanoidImMCPGetup
 from phc.env.tasks.vec_task_wrappers import VecTaskPythonWrapper
 from phc.env.tasks.humanoid_im_demo import HumanoidImDemo
 from phc.env.tasks.humanoid_im_mcp_demo import HumanoidImMCPDemo
+
+from phc.env.tasks.humanoid_amp_heading import HumanoidAMPHeading
 
 from isaacgym import rlgpu
 

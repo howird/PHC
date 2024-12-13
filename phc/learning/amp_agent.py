@@ -1076,14 +1076,18 @@ class AMPAgent(common_agent.CommonAgent):
         #     train_info_dict["success_rate"] =  1 - torch.mean((train_info['terminated_flags'] > 0).float()).item()
 
         if "reward_raw" in train_info:
-            reward_raw = train_info["reward_raw"].cpu().numpy().tolist()
-            # train_info_dict["rewards/body_pos"] = reward_raw[0]
-            # train_info_dict["rewards/body_rot"] = reward_raw[1]
-            # train_info_dict["rewards/lin_vel"] = reward_raw[2]
-            # train_info_dict["rewards/ang_vel"] = reward_raw[3]
-            # train_info_dict["rewards/power"] = reward_raw[4]
-            train_info_dict["rewards/pos_reward"] = reward_raw[0]
-            train_info_dict["rewards/heading_reward"] = reward_raw[1]
+            (
+                train_info_dict["rewards/pos_reward"],
+                train_info_dict["rewards/heading_reward"],
+                train_info_dict["rewards/speed_reward"],
+            ) = train_info["reward_raw"].cpu().numpy().tolist()
+            # (
+            #     train_info_dict["rewards/body_pos"],
+            #     train_info_dict["rewards/body_rot"],
+            #     train_info_dict["rewards/lin_vel"],
+            #     train_info_dict["rewards/ang_vel"],
+            #     train_info_dict["rewards/power"]
+            # ) = train_info["reward_raw"].cpu().numpy().tolist()
 
         if "sym_loss" in train_info:
             train_info_dict["loss/sym_loss"] = torch_ext.mean_list(
