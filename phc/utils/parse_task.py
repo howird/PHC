@@ -26,6 +26,8 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+# ruff: noqa: F401
+
 from phc.env.tasks.humanoid import Humanoid
 from phc.env.tasks.humanoid_amp import HumanoidAMP
 from phc.env.tasks.humanoid_amp_getup import HumanoidAMPGetup
