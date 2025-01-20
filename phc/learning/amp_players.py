@@ -6,7 +6,6 @@ from phc.utils.running_mean_std import RunningMeanStd
 import learning.common_player as common_player
 
 
-
 def rescale_actions(low, high, action):
     d = (high - low) / 2.0
     m = (high + low) / 2.0

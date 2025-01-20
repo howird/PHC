@@ -50,22 +50,24 @@ class AMPAgent(common_agent.CommonAgent):
         kin_lr = float(self.vec_env.env.task.kin_lr)
 
         # Optional dynamic reward weighting
-        self._use_dynamic_reward_weights = config.get("use_dynamic_reward_weights", False)
-        
+        self._use_dynamic_reward_weights = config.get(
+            "use_dynamic_reward_weights", False
+        )
+
         if self._use_dynamic_reward_weights:
             # Annealing parameters
             self._task_reward_w_initial = config["task_reward_w"]
             self._disc_reward_w_initial = config["disc_reward_w"]
             self._task_reward_w_final = config["task_reward_w_final"]
             self._task_reward_anneal_epochs = config["task_reward_anneal_epochs"]
-            
+
             # Create linear annealing schedule
             self._task_reward_w_scheduler = LinearAnneal(
-                start_value=self._task_reward_w_initial, 
-                end_value=self._task_reward_w_final, 
-                total_steps=self._task_reward_anneal_epochs
+                start_value=self._task_reward_w_initial,
+                end_value=self._task_reward_w_final,
+                total_steps=self._task_reward_anneal_epochs,
             )
-            
+
             # Tracking for logging
             self._current_task_reward_w = self._task_reward_w_initial
             self._current_disc_reward_w = self._disc_reward_w_initial
@@ -992,18 +994,18 @@ class AMPAgent(common_agent.CommonAgent):
 
     def _combine_rewards(self, task_rewards, amp_rewards):
         disc_r = amp_rewards["disc_rewards"]
-        
+
         if self._use_dynamic_reward_weights:
             # Dynamically compute task and discriminator reward weights
             self._current_task_reward_w = self._task_reward_w_scheduler.step()
             self._current_disc_reward_w = 1.0 - self._current_task_reward_w
-        
+
         # COMBINE REWARDS with weights
         combined_rewards = (
-            self._current_task_reward_w * task_rewards + 
-            self._current_disc_reward_w * disc_r
+            self._current_task_reward_w * task_rewards
+            + self._current_disc_reward_w * disc_r
         )
-        
+
         return combined_rewards
 
     def _eval_disc(self, amp_obs):
@@ -1091,10 +1093,12 @@ class AMPAgent(common_agent.CommonAgent):
             )
 
         # Log current reward weightings
-        train_info_dict.update({
-            "reward_weights/task_reward_weight": self._current_task_reward_w,
-            "reward_weights/disc_reward_weight": self._current_disc_reward_w
-        })
+        train_info_dict.update(
+            {
+                "reward_weights/task_reward_weight": self._current_task_reward_w,
+                "reward_weights/disc_reward_weight": self._current_disc_reward_w,
+            }
+        )
 
         if "returns" in train_info:
             train_info_dict["rewards/returns"] = train_info["returns"].mean().item()

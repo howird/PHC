@@ -110,6 +110,7 @@ class HumanoidAMPHeading(HumanoidAMP):
 
         target_dir = target_vec / (torch.norm(target_vec, dim=-1, keepdim=True) + 1e-8)
         vel_proj = torch.sum(root_vel * target_dir, dim=-1)
+
         speed_reward = torch.exp(
             -self.speed_reward_scale
             * torch.maximum(
@@ -123,11 +124,28 @@ class HumanoidAMPHeading(HumanoidAMP):
             )
         )
 
-        self.rew_buf[:] = (
+        reward = (
             self.pos_reward_weight * pos_reward
             + self.dir_reward_weight * heading_reward
             + self.speed_reward_weight * speed_reward
         )
+
+        if self.num_envs == 1:
+            current_speed = vel_proj.item()
+            desired_speed = (
+                self.target_speed["constant_speed"]
+                if self.speed_type == "constant"
+                else self.current_target_speeds.item()
+            )
+            print(
+                f"Curr Pos: [{root_pos[0,0]:6.2f}, {root_pos[0,1]:6.2f}] | "
+                + f"Des Pos: [{self.target_pos[0,0]:6.2f}, {self.target_pos[0,1]:6.2f}] | "
+                + f"Curr Speed: {current_speed:6.2f} | "
+                + f"Des Speed: {desired_speed:6.2f} | "
+                + f"Reward: {reward.item():6.2f}"
+            )
+
+        self.rew_buf[:] = reward
 
         # Store raw rewards for debugging
         self.reward_raw = torch.stack(
@@ -171,7 +189,9 @@ class HumanoidAMPHeading(HumanoidAMP):
         if self.speed_type == "constant":
             return torch.cat([target_vec_norm, vel_proj], dim=-1)
         else:
-            return torch.cat([target_vec_norm, vel_proj, target_speeds[:, None]], dim=-1)
+            return torch.cat(
+                [target_vec_norm, vel_proj, target_speeds[:, None]], dim=-1
+            )
 
     def get_task_obs_size(self):
         # 2D normalized target vector + 1D velocity projection + 1D target speed

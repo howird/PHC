@@ -35,15 +35,13 @@ os.environ["OMP_NUM_THREADS"] = "1"
 sys.path.append(os.getcwd())
 
 
-# def debugger(port=5678):
-#     import debugpy
+def debugger(port=5678):
+    import debugpy
 
-#     debugpy.listen(port)
-#     print(f"Waiting for debugger attach to port: {port}")
-#     debugpy.wait_for_client()
+    debugpy.listen(port)
+    print(f"Waiting for debugger attach to port: {port}")
+    debugpy.wait_for_client()
 
-
-# debugger()
 
 from phc.utils.config import set_np_formatting, set_seed
 from phc.utils.parse_task import parse_task
@@ -359,7 +357,7 @@ def main(cfg_hydra: DictConfig) -> None:
         flags.no_virtual_display,
         flags.render_o3d,
     ) = (
-        cfg.debug,
+        cfg.print_logs,
         cfg.follow,
         False,
         False,
@@ -374,6 +372,9 @@ def main(cfg_hydra: DictConfig) -> None:
         cfg.no_virtual_display,
         cfg.render_o3d,
     )
+
+    if cfg.debug:
+        debugger()
 
     flags.test = cfg.test
     flags.add_proj = cfg.add_proj

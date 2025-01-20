@@ -112,7 +112,6 @@ def start_pose_estimate():
         fps
     offset = np.zeros((5, 1))
 
-
     global_transform = sRot.from_quat([0.5, 0.5, 0.5, 0.5]).inv().as_matrix()
     transform = sRot.from_euler(
         "xyz", np.array([-np.pi / 2, 0, 0]), degrees=False

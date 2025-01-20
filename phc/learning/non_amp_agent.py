@@ -50,22 +50,24 @@ class NonAMPAgent(common_agent.CommonAgent):
         kin_lr = float(self.vec_env.env.task.kin_lr)
 
         # Optional dynamic reward weighting
-        self._use_dynamic_reward_weights = config.get("use_dynamic_reward_weights", False)
-        
+        self._use_dynamic_reward_weights = config.get(
+            "use_dynamic_reward_weights", False
+        )
+
         if self._use_dynamic_reward_weights:
             # Annealing parameters
             self._task_reward_w_initial = config["task_reward_w"]
             self._disc_reward_w_initial = config["disc_reward_w"]
             self._task_reward_w_final = config["task_reward_w_final"]
             self._task_reward_anneal_epochs = config["task_reward_anneal_epochs"]
-            
+
             # Create linear annealing schedule
             self._task_reward_w_scheduler = LinearAnneal(
-                start_value=self._task_reward_w_initial, 
-                end_value=self._task_reward_w_final, 
-                total_steps=self._task_reward_anneal_epochs
+                start_value=self._task_reward_w_initial,
+                end_value=self._task_reward_w_final,
+                total_steps=self._task_reward_anneal_epochs,
             )
-            
+
             # Tracking for logging
             self._current_task_reward_w = self._task_reward_w_initial
             self._current_disc_reward_w = self._disc_reward_w_initial
@@ -801,7 +803,7 @@ class NonAMPAgent(common_agent.CommonAgent):
         self._amp_observation_space = None
         self._amp_batch_size = None
         self._amp_minibatch_size = None
-        
+
         # Remove discriminator-related parameters
         self._disc_coef = 0
         self._normalize_amp_input = False
@@ -809,10 +811,10 @@ class NonAMPAgent(common_agent.CommonAgent):
 
     def _build_net_config(self):
         config = super()._build_net_config()
-        
+
         # Remove AMP-specific network configurations
         config.pop("amp_input_shape", None)
-        
+
         config["task_obs_size_detail"] = (
             self.vec_env.env.task.get_task_obs_size_detail()
         )
@@ -994,10 +996,10 @@ class NonAMPAgent(common_agent.CommonAgent):
     def _assemble_train_info(self, train_info, frame):
         # Remove discriminator-related logging
         train_info_dict = super()._assemble_train_info(train_info, frame)
-        
+
         for key in keys_to_remove:
             train_info_dict.pop(key, None)
-        
+
         if "returns" in train_info:
             train_info_dict["rewards/returns"] = train_info["returns"].mean().item()
 

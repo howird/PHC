@@ -1,5 +1,3 @@
-
-
 def kl_multi(qm, qv, pm, pv):
     """
     q: posterior
